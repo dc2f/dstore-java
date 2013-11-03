@@ -1,5 +1,7 @@
 package com.dc2f.dstore.hierachynodestore;
 
-public interface Commit {
+import com.dc2f.dstore.storage.StorageId;
 
+public interface Commit {
+	StorageId getStorageId();
 }

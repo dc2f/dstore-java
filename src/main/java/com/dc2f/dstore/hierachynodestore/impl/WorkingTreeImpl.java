@@ -123,8 +123,10 @@ public class WorkingTreeImpl implements WorkingTree {
 //			throw new RuntimeException("changedNodes must be empty after saving everything." + changedNodes);
 			changedNodes.clear();
 		}
-		headCommit = new StoredCommit(storageBackend.generateUniqueId(), new StorageId[]{headCommit.getId()}, oldRootNode.getStorageId());
-		return null;
+		StoredCommit storedCommit = new StoredCommit(storageBackend.generateUniqueId(), new StorageId[]{headCommit.getId()}, oldRootNode.getStorageId());
+		headCommit = storedCommit;
+		storageBackend.writeCommit(storedCommit);
+		return new CommitImpl(headCommit);
 	}
 
 	private Set<WorkingTreeNodeImpl> findNodesToUpdate() {

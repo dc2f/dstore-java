@@ -34,9 +34,17 @@ public class HierarchicalNodeStore {
 	}
 	
 	public WorkingTree checkoutBranch(String branchName) {
-		StoredCommit commit = storageBackend.readBranch(branchName);
-		if (commit != null) {
-			return new WorkingTreeImpl(this, storageBackend, commit, branchName);
+		StoredCommit storedCommit = storageBackend.readBranch(branchName);
+		if (storedCommit != null) {
+			return new WorkingTreeImpl(this, storageBackend, storedCommit, branchName);
+		}
+		return null;
+	}
+
+	public WorkingTree checkoutCommit(Commit c1) {
+		StoredCommit storedCommit = storageBackend.readCommit(c1.getStorageId());
+		if (storedCommit != null) {
+			return new WorkingTreeImpl(this, storageBackend, storedCommit, null);
 		}
 		return null;
 	}

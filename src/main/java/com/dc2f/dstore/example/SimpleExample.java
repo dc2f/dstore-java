@@ -48,6 +48,14 @@ public class SimpleExample {
 		WorkingTree wt3 = nodeStore.checkoutBranch("master");
 		
 		analyze("even a new wt3 of master must not see any changes", wt3);
+		
+		WorkingTree wtC1 = nodeStore.checkoutCommit(c1);
+		WorkingTree wtC2 = nodeStore.checkoutCommit(c2);
+		WorkingTree wtC3 = nodeStore.checkoutCommit(c3);
+		
+		analyze("new wtC1 of commit1 must be the same as before in (1)", wtC1);
+		analyze("new wtC2 of commit2 must be the same as before in (2)", wtC2);
+		analyze("new wtC2 of commit3 must be the same as before in (3)", wtC3);
 
 		
 //		a1.addChild("A11");

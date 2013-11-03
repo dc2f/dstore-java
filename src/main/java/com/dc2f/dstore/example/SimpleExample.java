@@ -1,15 +1,25 @@
 package com.dc2f.dstore.example;
 
+import java.io.File;
+
 import com.dc2f.dstore.hierachynodestore.Commit;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeUtils;
+import com.dc2f.dstore.storage.flatjsonfiles.SlowJsonFileStorageBackend;
 import com.dc2f.dstore.storage.map.HashMapStorage;
 
 public class SimpleExample {
 	public static void main(String[] args) {
-		HierarchicalNodeStore nodeStore = new HierarchicalNodeStore(new HashMapStorage());
+//		HierarchicalNodeStore nodeStore = new HierarchicalNodeStore(new HashMapStorage());
+//		writeToStore(nodeStore);
+		
+		SlowJsonFileStorageBackend persistentNodeStore = new SlowJsonFileStorageBackend(new File("tmpwd"));
+		writeToStore(new HierarchicalNodeStore(persistentNodeStore));
+	}
+	
+	public static void writeToStore(HierarchicalNodeStore nodeStore) {
 		
 		WorkingTree wt1 = nodeStore.checkoutBranch("master");
 		

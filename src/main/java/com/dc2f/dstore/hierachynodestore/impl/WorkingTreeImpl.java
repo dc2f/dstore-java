@@ -126,6 +126,10 @@ public class WorkingTreeImpl implements WorkingTree {
 		StoredCommit storedCommit = new StoredCommit(storageBackend.generateUniqueId(), new StorageId[]{headCommit.getId()}, oldRootNode.getStorageId());
 		headCommit = storedCommit;
 		storageBackend.writeCommit(storedCommit);
+		if (branchName != null) {
+			// user has checked out a branch, so make sure to set branch to this commit.
+			storageBackend.writeBranch(branchName, storedCommit);
+		}
 		return new CommitImpl(headCommit);
 	}
 

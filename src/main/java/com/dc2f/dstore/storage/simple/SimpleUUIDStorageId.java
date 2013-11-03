@@ -37,5 +37,10 @@ public class SimpleUUIDStorageId implements StorageId {
 		}
 		return uuid.equals(obj);
 	}
+	
+	@Override
+	public String toString() {
+		return uuid;
+	}
 
 }

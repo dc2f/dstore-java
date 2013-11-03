@@ -11,6 +11,9 @@ public class WorkingTreeUtils {
 		builder.append(Strings.repeat(" ", depth));
 		builder.append("- ");
 		builder.append(rootNode.getName());
+		builder.append(" (");
+		builder.append(rootNode.getStorageId().getIdString());
+		builder.append(")");
 		builder.append(LINE_SEPARATOR);
 		
 		for (String childName : rootNode.getChildrenNames()) {

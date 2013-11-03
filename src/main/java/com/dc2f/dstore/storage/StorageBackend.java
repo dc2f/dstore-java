@@ -21,10 +21,12 @@ public interface StorageBackend {
 	
 	StoredFlatNode readNode(StorageId id);
 	
-	void writeNode(StoredFlatNode node);
+	StoredFlatNode writeNode(StoredFlatNode node);
 
 	public SimpleUUIDStorageId getDefaultRootCommitId();
 	
 	Map<String, StorageId[]> readChildren(StorageId childrenStorageId);
+	
+	StorageId writeChildren(Map<String, StorageId[]> children);
 
 }

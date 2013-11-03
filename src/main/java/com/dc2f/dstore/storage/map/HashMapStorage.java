@@ -1,6 +1,7 @@
 package com.dc2f.dstore.storage.map;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.dc2f.dstore.storage.StorageBackend;
@@ -22,12 +23,18 @@ public class HashMapStorage implements StorageBackend {
 	Map<StorageId, StoredFlatNode> storedNodes = new HashMap<>();
 	Map<StorageId, Map<String, StorageId[]>> storedChildren = new HashMap<>();
 	Map<StorageId, Map<String, StoredProperty[]>> storedProperties = new HashMap<>();
+	
+	HashSet<StorageId> generatedStorageIds = new HashSet<>();
 
 	@Override
 	public StorageId generateUniqueId() {
 		// TODO do we need to verify this UUID is really unique? probably not, since we can't
 		// check uniquenes in a distributed environment anyway.. so don't even try to..
-		return SimpleUUIDStorageId.generateRandom();
+		SimpleUUIDStorageId tmp = SimpleUUIDStorageId.generateRandom();
+		if (generatedStorageIds.add(tmp)) {
+			return tmp;
+		}
+		throw new RuntimeException("duplicate UUID?!");
 	}
 
 	@Override
@@ -61,8 +68,11 @@ public class HashMapStorage implements StorageBackend {
 	}
 
 	@Override
-	public void writeNode(StoredFlatNode node) {
+	public StoredFlatNode writeNode(StoredFlatNode node) {
+		System.out.println("Writing " + node.getStorageId());
+		StoredFlatNode newNode = new StoredFlatNode(node);
 		storedNodes.put(node.getStorageId(), node);
+		return newNode;
 	}
 
 	@Override
@@ -73,6 +83,13 @@ public class HashMapStorage implements StorageBackend {
 	@Override
 	public Map<String, StorageId[]> readChildren(StorageId childrenStorageId) {
 		return storedChildren.get(childrenStorageId);
+	}
+
+	@Override
+	public StorageId writeChildren(Map<String, StorageId[]> children) {
+		StorageId storageId = generateUniqueId();
+		storedChildren.put(storageId, children);
+		return storageId;
 	}
 
 }

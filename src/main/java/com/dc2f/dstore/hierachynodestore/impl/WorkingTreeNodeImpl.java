@@ -34,7 +34,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	 * funny side note: value should never be null. whatever happens.
 	 */
 	Map<String, List<WorkingTreeNode>> children = new HashMap<String, List<WorkingTreeNode>>();
-	private boolean isNew = false;
+	boolean isNew = false;
 	MutableStoredFlatNode mutableStoredNode;
 
 	public WorkingTreeNodeImpl(WorkingTreeImpl workingTreeImpl,
@@ -80,7 +80,8 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		StoredFlatNode childNode = new StoredFlatNode(workingTreeImpl.storageBackend.generateUniqueId(),
 				childName, node.getStorageId(), null, null);
 		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, childNode);
-		child.isNew  = true;
+		child.isNew = true;
+		workingTreeImpl.loadedNodes.put(child.getStorageId(), child);
 		List<WorkingTreeNode> childList = getChild(childName);
 		if (childList == null) {
 			childList = new ArrayList<>();
@@ -89,6 +90,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		childList.add(child);
 		changedChildren = true;
 		workingTreeImpl.notifyNodeChanged(this);
+		workingTreeImpl.notifyNodeChanged(child);
 		
 
 		return child;
@@ -121,10 +123,6 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 			return null;
 		}
 		return (WorkingTreeNodeImpl) workingTreeImpl.getNodeByStorageId(parentId);
-	}
-
-	public boolean isNew() {
-		return isNew;
 	}
 
 	public void createMutableStoredNode(StorageId generateUniqueId) {

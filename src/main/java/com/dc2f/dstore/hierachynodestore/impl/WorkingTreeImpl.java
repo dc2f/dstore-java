@@ -22,7 +22,7 @@ public class WorkingTreeImpl implements WorkingTree {
 	private StoredCommit headCommit;
 	private String branchName;
 	StorageBackend storageBackend;
-	private Map<StorageId, WorkingTreeNodeImpl> loadedNodes = new HashMap<>();
+	Map<StorageId, WorkingTreeNodeImpl> loadedNodes = new HashMap<>();
 	private List<WorkingTreeNodeImpl> changedNodes = new ArrayList<>();
 
 	public WorkingTreeImpl(HierarchicalNodeStore hierarchicalNodeStore,
@@ -63,11 +63,13 @@ public class WorkingTreeImpl implements WorkingTree {
 		if (message == null) {
 			message = "";
 		}
+		WorkingTreeNode oldRootNode = getRootNode();
 		Set<WorkingTreeNodeImpl> nodesToUpdate = findNodesToUpdate();
+//		System.out.println("nodesToUpdate: " + nodesToUpdate + " (" + changedNodes + ")");
 		// give the ones to update a new id before storing, otherwise child ids won't match
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
 			
-			if (!node.isNew()) {
+			if (!node.isNew) {
 				node.createMutableStoredNode(storageBackend.generateUniqueId());
 //				node.node.setStorageId();
 			} else {
@@ -106,7 +108,12 @@ public class WorkingTreeImpl implements WorkingTree {
 			if (parent != null && parent.mutableStoredNode != null) {
 				node.mutableStoredNode.setParentId(parent.mutableStoredNode.getStorageId());
 			}
+			if (parent != null && parent.mutableStoredNode == null) {
+				node.mutableStoredNode.setParentId(parent.node.getStorageId());
+//				throw new RuntimeException("we have to recursively change parent id, and mutableStorageNode must therefore never be null." + parent);
+			}
 			node.node = storageBackend.writeNode(node.mutableStoredNode);
+			node.isNew = false;
 			node.mutableStoredNode = null;
 			node.changedChildren = false;
 			changedNodes.remove(node);
@@ -116,6 +123,7 @@ public class WorkingTreeImpl implements WorkingTree {
 //			throw new RuntimeException("changedNodes must be empty after saving everything." + changedNodes);
 			changedNodes.clear();
 		}
+		headCommit = new StoredCommit(storageBackend.generateUniqueId(), new StorageId[]{headCommit.getId()}, oldRootNode.getStorageId());
 		return null;
 	}
 
@@ -133,6 +141,7 @@ public class WorkingTreeImpl implements WorkingTree {
 			while (true) {
 				// node has changed and is attached to root.
 				if (toUpdate.contains(node)) {
+//					System.out.println("already in toUpdate. " + node + " ---- " + changed);
 					toUpdate.addAll(changed);
 					break;
 				}
@@ -151,7 +160,10 @@ public class WorkingTreeImpl implements WorkingTree {
 					// if the last node isn't the root node,
 					// the node is detached from the tree and we don't need to write it
 					if (node == getRootNode()) {
+//						System.out.println("found the root node. " + changed);
 						toUpdate.addAll(changed);
+					} else {
+						System.out.println("node is detached from root node." + node + " (" + node.getStorageId() + ")");
 					}
 					break;
 				}

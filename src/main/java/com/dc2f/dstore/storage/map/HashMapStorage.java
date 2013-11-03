@@ -69,7 +69,7 @@ public class HashMapStorage implements StorageBackend {
 
 	@Override
 	public StoredFlatNode writeNode(StoredFlatNode node) {
-		System.out.println("Writing " + node.getStorageId());
+//		System.out.println("Writing " + node.getStorageId());
 		StoredFlatNode newNode = new StoredFlatNode(node);
 		storedNodes.put(node.getStorageId(), node);
 		return newNode;

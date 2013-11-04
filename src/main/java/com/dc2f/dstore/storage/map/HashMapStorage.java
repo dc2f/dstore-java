@@ -9,7 +9,7 @@ import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
 import com.dc2f.dstore.storage.StoredFlatNode;
 import com.dc2f.dstore.storage.StoredProperty;
-import com.dc2f.dstore.storage.simple.SimpleUUIDStorageId;
+import com.dc2f.dstore.storage.simple.SimpleStringStorageId;
 
 /**
  * Storage implementation backed by a few hashmaps.
@@ -27,14 +27,19 @@ public class HashMapStorage implements StorageBackend {
 	HashSet<StorageId> generatedStorageIds = new HashSet<>();
 
 	@Override
-	public StorageId generateUniqueId() {
+	public StorageId generateStorageId() {
 		// TODO do we need to verify this UUID is really unique? probably not, since we can't
 		// check uniquenes in a distributed environment anyway.. so don't even try to..
-		SimpleUUIDStorageId tmp = SimpleUUIDStorageId.generateRandom();
+		SimpleStringStorageId tmp = SimpleStringStorageId.generateRandom();
 		if (generatedStorageIds.add(tmp)) {
 			return tmp;
 		}
 		throw new RuntimeException("duplicate UUID?!");
+	}
+	
+	@Override
+	public StorageId storageIdFromString(String idString) {
+		return new SimpleStringStorageId(idString);
 	}
 
 	@Override
@@ -74,12 +79,7 @@ public class HashMapStorage implements StorageBackend {
 		storedNodes.put(node.getStorageId(), node);
 		return newNode;
 	}
-
-	@Override
-	public SimpleUUIDStorageId getDefaultRootCommitId() {
-		return new SimpleUUIDStorageId(ROOT_COMMIT_ID);
-	}
-
+	
 	@Override
 	public Map<String, StorageId[]> readChildren(StorageId childrenStorageId) {
 		return storedChildren.get(childrenStorageId);
@@ -87,7 +87,7 @@ public class HashMapStorage implements StorageBackend {
 
 	@Override
 	public StorageId writeChildren(Map<String, StorageId[]> children) {
-		StorageId storageId = generateUniqueId();
+		StorageId storageId = generateStorageId();
 		storedChildren.put(storageId, children);
 		return storageId;
 	}

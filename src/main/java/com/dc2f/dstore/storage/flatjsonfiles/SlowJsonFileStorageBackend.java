@@ -17,13 +17,12 @@ import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
 import com.dc2f.dstore.storage.StoredFlatNode;
-import com.dc2f.dstore.storage.simple.SimpleUUIDStorageId;
+import com.dc2f.dstore.storage.simple.SimpleStringStorageId;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 public class SlowJsonFileStorageBackend implements StorageBackend {
 	
-	private final static String ROOT_COMMIT_ID = "rootCommitId";
 	private final static String BRANCH_STORAGE_ID = "branchstorage";
 	private Logger logger = LoggerFactory.getLogger(SlowJsonFileStorageBackend.class);
 	
@@ -43,8 +42,13 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 	}
 
 	@Override
-	public StorageId generateUniqueId() {
-		return SimpleUUIDStorageId.generateRandom();
+	public StorageId generateStorageId() {
+		return SimpleStringStorageId.generateRandom();
+	}
+
+	@Override
+	public StorageId storageIdFromString(String idString) {
+		return new SimpleStringStorageId(idString);
 	}
 
 	@Override
@@ -79,7 +83,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 
 	@Override
 	public StoredCommit readBranch(String name) {
-		SimpleUUIDStorageId branchesStorageId = new SimpleUUIDStorageId(BRANCH_STORAGE_ID);
+		SimpleStringStorageId branchesStorageId = new SimpleStringStorageId(BRANCH_STORAGE_ID);
 		JSONObject branches = readFile(branchesStorageId, FILE_TYPE_MISC);
 		try {
 			StorageId commitId = readStorageId(branches.getString(name));
@@ -92,7 +96,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 
 	@Override
 	public void writeBranch(String name, StoredCommit commit) {
-		SimpleUUIDStorageId branchesStorageId = new SimpleUUIDStorageId(BRANCH_STORAGE_ID);
+		SimpleStringStorageId branchesStorageId = new SimpleStringStorageId(BRANCH_STORAGE_ID);
 		JSONObject branches = readFile(branchesStorageId, FILE_TYPE_MISC);
 		if (branches == null) {
 			branches = new JSONObject();
@@ -124,7 +128,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 		if (string == null) {
 			return null;
 		}
-		return new SimpleUUIDStorageId(string);
+		return new SimpleStringStorageId(string);
 	}
 
 	private String storeStorageId(StorageId id) {
@@ -149,11 +153,6 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 			logger.error("Error writing node.", e);
 			return null;
 		}
-	}
-
-	@Override
-	public SimpleUUIDStorageId getDefaultRootCommitId() {
-		return new SimpleUUIDStorageId(ROOT_COMMIT_ID);
 	}
 
 	@Override
@@ -186,7 +185,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 		}
 		StorageId[] children = new StorageId[arr.length()];
 		for (int i = 0 ; i < children.length ; i++) {
-			children[i] = new SimpleUUIDStorageId(arr.getString(i));
+			children[i] = new SimpleStringStorageId(arr.getString(i));
 		}
 		return children;
 	}
@@ -198,7 +197,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 			for (Map.Entry<String, StorageId[]> entry : children.entrySet()) {
 				tmp.put(entry.getKey(), storageIdArrayToJsonArray(entry.getValue()));
 			}
-			StorageId childrenStorageId = generateUniqueId();
+			StorageId childrenStorageId = generateStorageId();
 			writeFile(childrenStorageId, tmp, FILE_TYPE_CHILDREN);
 			return childrenStorageId;
 		} catch (JSONException e) {

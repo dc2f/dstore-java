@@ -70,7 +70,7 @@ public class WorkingTreeImpl implements WorkingTree {
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
 			
 			if (!node.isNew) {
-				node.createMutableStoredNode(storageBackend.generateUniqueId());
+				node.createMutableStoredNode(storageBackend.generateStorageId());
 //				node.node.setStorageId();
 			} else {
 				// this should be done differently.. new nodes should always have a mutable stored node..
@@ -123,7 +123,7 @@ public class WorkingTreeImpl implements WorkingTree {
 //			throw new RuntimeException("changedNodes must be empty after saving everything." + changedNodes);
 			changedNodes.clear();
 		}
-		StoredCommit storedCommit = new StoredCommit(storageBackend.generateUniqueId(), new StorageId[]{headCommit.getId()}, oldRootNode.getStorageId());
+		StoredCommit storedCommit = new StoredCommit(storageBackend.generateStorageId(), new StorageId[]{headCommit.getId()}, oldRootNode.getStorageId());
 		headCommit = storedCommit;
 		storageBackend.writeCommit(storedCommit);
 		if (branchName != null) {

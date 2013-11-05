@@ -26,7 +26,7 @@ public class HierarchicalNodeStore {
 		StorageId rootCommitId = storageBackend.storageIdFromString(ROOT_COMMIT_ID);
 		StoredCommit rootCommit = storageBackend.readCommit(rootCommitId);
 		if (rootCommit == null) {
-			StoredFlatNode storedRootNode = new StoredFlatNode(storageBackend.generateStorageId(), ROOT_NODE_NAME, null, null, null);
+			StoredFlatNode storedRootNode = new StoredFlatNode(storageBackend.generateStorageId(), ROOT_NODE_NAME, null, null);
 			rootCommit = new StoredCommit(rootCommitId, null, storedRootNode.getStorageId());
 			storageBackend.writeNode(storedRootNode);
 			storageBackend.writeCommit(rootCommit);

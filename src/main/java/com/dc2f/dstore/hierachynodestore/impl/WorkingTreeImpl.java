@@ -36,11 +36,11 @@ public class WorkingTreeImpl implements WorkingTree {
 	@Override
 	public WorkingTreeNode getRootNode() {
 		StorageId rootNodeId = headCommit.getRootNode();
-		return getNodeByStorageId(rootNodeId);
+		return getNodeByStorageId(rootNodeId, null);
 //		return new WorkingTreeNodeImpl(this, storageBackend.readNode(rootNodeId));
 	}
 	
-	public WorkingTreeNode getNodeByStorageId(StorageId nodeStorageId) {
+	public WorkingTreeNode getNodeByStorageId(StorageId nodeStorageId, WorkingTreeNodeImpl parentNode) {
 		// TODO shouldn't we add caching right here?
 		WorkingTreeNodeImpl ret = loadedNodes.get(nodeStorageId);
 		if (ret == null) {
@@ -48,7 +48,7 @@ public class WorkingTreeImpl implements WorkingTree {
 			if (flatStoredNode == null) {
 				throw new RuntimeException("Unable to find node with storage id {" + nodeStorageId + "}");
 			}
-			ret = new WorkingTreeNodeImpl(this, flatStoredNode);
+			ret = new WorkingTreeNodeImpl(this, flatStoredNode, parentNode);
 			loadedNodes.put(nodeStorageId, ret);
 		}
 		return ret;
@@ -103,15 +103,15 @@ public class WorkingTreeImpl implements WorkingTree {
 						storageBackend.writeChildren(children));
 			}
 //			node.node = new StoredFlatNode(node.mutableStoredNode);
-			WorkingTreeNodeImpl parent = node.getParent();
-			// parent must always be mutable right here?!
-			if (parent != null && parent.mutableStoredNode != null) {
-				node.mutableStoredNode.setParentId(parent.mutableStoredNode.getStorageId());
-			}
-			if (parent != null && parent.mutableStoredNode == null) {
-				node.mutableStoredNode.setParentId(parent.node.getStorageId());
-//				throw new RuntimeException("we have to recursively change parent id, and mutableStorageNode must therefore never be null." + parent);
-			}
+//			WorkingTreeNodeImpl parent = node.getParent();
+//			// parent must always be mutable right here?!
+//			if (parent != null && parent.mutableStoredNode != null) {
+//				node.mutableStoredNode.setParentId(parent.mutableStoredNode.getStorageId());
+//			}
+//			if (parent != null && parent.mutableStoredNode == null) {
+//				node.mutableStoredNode.setParentId(parent.node.getStorageId());
+////				throw new RuntimeException("we have to recursively change parent id, and mutableStorageNode must therefore never be null." + parent);
+//			}
 			node.node = storageBackend.writeNode(node.mutableStoredNode);
 			node.isNew = false;
 			node.mutableStoredNode = null;

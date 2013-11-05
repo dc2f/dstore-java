@@ -117,9 +117,8 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 			JSONObject obj = readFile(id, FILE_TYPE_NODE);
 			String name = obj.getString("name");
 			StorageId children = readStorageId(obj.optString("children", null));
-			StorageId parentId = readStorageId(obj.optString("parentid", null));
 			StorageId properties = readStorageId(obj.optString("properties", null));
-			return new StoredFlatNode(id, name, parentId, children, properties);
+			return new StoredFlatNode(id, name, children, properties);
 		} catch (JSONException e) {
 			logger.error("Error reading node.", e);
 			return null;
@@ -146,7 +145,6 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 			JSONObject obj = new JSONObject();
 			obj.put("name", node.getName());
 			obj.put("children", storeStorageId(node.getChildren()));
-			obj.put("parentid", storeStorageId(node.getParentId()));
 			obj.put("properties", storeStorageId(node.getProperties()));
 			writeFile(node.getStorageId(), obj, FILE_TYPE_NODE);
 			StoredFlatNode newNode = new StoredFlatNode(node);

@@ -1,7 +1,6 @@
 package com.dc2f.dstore.hierachynodestore.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,10 +36,12 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	Map<String, List<WorkingTreeNode>> children = new HashMap<String, List<WorkingTreeNode>>();
 	boolean isNew = false;
 	MutableStoredFlatNode mutableStoredNode;
+	private WorkingTreeNodeImpl parentNode;
 
 	public WorkingTreeNodeImpl(WorkingTreeImpl workingTreeImpl,
-			StoredFlatNode flatNode) {
+			StoredFlatNode flatNode, WorkingTreeNodeImpl parentNode) {
 		this.workingTreeImpl = workingTreeImpl;
+		this.parentNode = parentNode;
 		if (flatNode == null) {
 			throw new IllegalArgumentException("flatNode must not be null.");
 		}
@@ -59,17 +60,13 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	
 	@Override
 	public List<WorkingTreeNode> getChild(String childName) {
-		ChildQueryAdapter childQuery = workingTreeImpl.storageBackend.getAdapter(ChildQueryAdapter.class);
-		childQuery.getChildren("name", childName);
-		
-		
 		List<WorkingTreeNode> childList = children.get(childName);
 		if (childList == null) {
 			StorageId[] storedChildList = getStoredChildren().get(childName);
 			if (storedChildList != null) {
 				childList = new ArrayList<>(storedChildList.length);
 				for (StorageId storedId : storedChildList) {
-					WorkingTreeNode child = workingTreeImpl.getNodeByStorageId(storedId);
+					WorkingTreeNode child = workingTreeImpl.getNodeByStorageId(storedId, this);
 					childList.add(child);
 				}
 			} else {
@@ -83,8 +80,8 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	@Override
 	public WorkingTreeNode addChild(String childName) {
 		StoredFlatNode childNode = new StoredFlatNode(workingTreeImpl.storageBackend.generateStorageId(),
-				childName, node.getStorageId(), null, null);
-		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, childNode);
+				childName, null, null);
+		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, childNode, this);
 		child.isNew = true;
 		workingTreeImpl.loadedNodes.put(child.getStorageId(), child);
 		List<WorkingTreeNode> childList = getChild(childName);
@@ -123,11 +120,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	}
 
 	WorkingTreeNodeImpl getParent() {
-		StorageId parentId = node.getParentId();
-		if (parentId == null) {
-			return null;
-		}
-		return (WorkingTreeNodeImpl) workingTreeImpl.getNodeByStorageId(parentId);
+		return parentNode;
 	}
 
 	public void createMutableStoredNode(StorageId generateUniqueId) {

@@ -28,5 +28,7 @@ public interface StorageBackend {
 	Map<String, StorageId[]> readChildren(StorageId childrenStorageId);
 	
 	StorageId writeChildren(Map<String, StorageId[]> children);
+	
+	<T extends StorageAdapter>T getAdapter(Class<T> adapterInterface);
 
 }

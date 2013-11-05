@@ -13,6 +13,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dc2f.dstore.storage.ChildQueryAdapter;
+import com.dc2f.dstore.storage.StorageAdapter;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
@@ -243,5 +245,15 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 			logger.error("Error while reading json file.", e);
 			return null;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends StorageAdapter> T getAdapter(Class<T> adapterInterface) {
+		if (adapterInterface.isAssignableFrom(ChildQueryAdapter.class)) {
+			// FIXME this should be cached, only one instance is necessary.
+			return (T) new SlowChildQueryAdapter(this);
+		}
+		return null;
 	}
 }

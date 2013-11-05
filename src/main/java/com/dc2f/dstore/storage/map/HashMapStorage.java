@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import com.dc2f.dstore.storage.StorageAdapter;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
@@ -90,6 +91,11 @@ public class HashMapStorage implements StorageBackend {
 		StorageId storageId = generateUniqueId();
 		storedChildren.put(storageId, children);
 		return storageId;
+	}
+
+	@Override
+	public <T extends StorageAdapter> T getAdapter(Class<T> adapterInterface) {
+		return null;
 	}
 
 }

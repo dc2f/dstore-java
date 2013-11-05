@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
+import com.dc2f.dstore.storage.ChildQueryAdapter;
 import com.dc2f.dstore.storage.MutableStoredFlatNode;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredFlatNode;
@@ -58,6 +59,10 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	
 	@Override
 	public List<WorkingTreeNode> getChild(String childName) {
+		ChildQueryAdapter childQuery = workingTreeImpl.storageBackend.getAdapter(ChildQueryAdapter.class);
+		childQuery.getChildren("name", childName);
+		
+		
 		List<WorkingTreeNode> childList = children.get(childName);
 		if (childList == null) {
 			StorageId[] storedChildList = getStoredChildren().get(childName);

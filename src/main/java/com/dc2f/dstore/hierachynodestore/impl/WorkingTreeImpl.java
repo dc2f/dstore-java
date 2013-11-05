@@ -81,26 +81,15 @@ public class WorkingTreeImpl implements WorkingTree {
 		// write all changed nodes to storage.
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
 			if (node.changedChildren) {
-				Map<String, StorageId[]> children = new HashMap<>();
-				Iterable<String> childNames = node.getChildrenNames();
-				for (String childName : childNames) {
-					List<WorkingTreeNode> childList = node.children.get(childName);
-					StorageId[] childStorageIds;
-					// if children weren't loaded yet, we don't need to load/store them.. just reuse the array
-					if (childList != null) {
-						childStorageIds = new StorageId[childList.size()];
-						int i = 0;
-						for (WorkingTreeNode childNode : childList) {
-							WorkingTreeNodeImpl childNodeImpl = (WorkingTreeNodeImpl) childNode;
-							childStorageIds[i++] = childNodeImpl.getStorageId();
-						}
-					} else {
-						childStorageIds = node.getStoredChildren().get(childName);
-					}
-					children.put(childName, childStorageIds);
+				List<WorkingTreeNode> nodeChildren = node.loadChildren();
+				StorageId[] childStorageIds = new StorageId[nodeChildren.size()];
+				int i = 0;
+				for (WorkingTreeNode childNode : nodeChildren) {
+					WorkingTreeNodeImpl childNodeImpl = (WorkingTreeNodeImpl) childNode;
+					childStorageIds[i++] = childNodeImpl.getStorageId();
 				}
 				node.mutableStoredNode.setChildren(
-						storageBackend.writeChildren(children));
+						storageBackend.writeChildren(childStorageIds));
 			}
 //			node.node = new StoredFlatNode(node.mutableStoredNode);
 //			WorkingTreeNodeImpl parent = node.getParent();

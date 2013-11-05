@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import com.dc2f.dstore.storage.ChildQueryAdapter;
 import com.dc2f.dstore.storage.StorageAdapter;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
 import com.dc2f.dstore.storage.StoredFlatNode;
 import com.dc2f.dstore.storage.StoredProperty;
+import com.dc2f.dstore.storage.flatjsonfiles.SlowChildQueryAdapter;
 import com.dc2f.dstore.storage.simple.SimpleStringStorageId;
 
 /**
@@ -22,7 +24,7 @@ public class HashMapStorage implements StorageBackend {
 	Map<String, StorageId> storedBranches = new HashMap<>();
 	Map<StorageId, StoredCommit> storedCommit = new HashMap<>();
 	Map<StorageId, StoredFlatNode> storedNodes = new HashMap<>();
-	Map<StorageId, Map<String, StorageId[]>> storedChildren = new HashMap<>();
+	Map<StorageId, StorageId[]> storedChildren = new HashMap<>();
 	Map<StorageId, Map<String, StoredProperty[]>> storedProperties = new HashMap<>();
 	
 	HashSet<StorageId> generatedStorageIds = new HashSet<>();
@@ -82,19 +84,24 @@ public class HashMapStorage implements StorageBackend {
 	}
 	
 	@Override
-	public Map<String, StorageId[]> readChildren(StorageId childrenStorageId) {
+	public StorageId[] readChildren(StorageId childrenStorageId) {
 		return storedChildren.get(childrenStorageId);
 	}
 
 	@Override
-	public StorageId writeChildren(Map<String, StorageId[]> children) {
+	public StorageId writeChildren(StorageId[] children) {
 		StorageId storageId = generateStorageId();
 		storedChildren.put(storageId, children);
 		return storageId;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends StorageAdapter> T getAdapter(Class<T> adapterInterface) {
+		if (adapterInterface.isAssignableFrom(ChildQueryAdapter.class)) {
+			// FIXME this should be cached, only one instance is necessary.
+			return (T) new SlowChildQueryAdapter(this);
+		}
 		return null;
 	}
 

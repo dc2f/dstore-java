@@ -1,7 +1,5 @@
 package com.dc2f.dstore.hierachynodestore;
 
-import java.util.List;
-
 import com.dc2f.dstore.storage.StorageId;
 
 public interface WorkingTreeNode {
@@ -11,7 +9,7 @@ public interface WorkingTreeNode {
 
 	String getName();
 
-	List<WorkingTreeNode> getChild(String childName);
+	Iterable<WorkingTreeNode> getChild(String childName);
 
 	StorageId getStorageId();
 }

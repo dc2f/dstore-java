@@ -3,9 +3,6 @@ package com.dc2f.dstore.storage.flatjsonfiles;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -156,27 +153,19 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 	}
 
 	@Override
-	public Map<String, StorageId[]> readChildren(StorageId childrenStorageId) {
+	public StorageId[] readChildren(StorageId childrenStorageId) {
 		if (childrenStorageId == null) {
 			return null;
 		}
 		JSONObject tmp = readFile(childrenStorageId, FILE_TYPE_CHILDREN);
-		Map<String, StorageId[]> ret = new HashMap<String, StorageId[]>();
 		
 		try {
-			for (@SuppressWarnings("unchecked")
-			Iterator<String> it = tmp.keys() ; it.hasNext() ; ) {
-				String name = it.next();
-				JSONArray arr = tmp.getJSONArray(name);
-				StorageId[] children = readStorageIdArray(arr);
-				
-				ret.put(name, children);
-			}
+			JSONArray arr = tmp.getJSONArray("children");
+			return readStorageIdArray(arr);
 		} catch(JSONException e) {
 			logger.error("Error while reading children.", e);
+			return null;
 		}
-		
-		return ret;
 	}
 
 	private StorageId[] readStorageIdArray(JSONArray arr) throws JSONException {
@@ -191,12 +180,10 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 	}
 
 	@Override
-	public StorageId writeChildren(Map<String, StorageId[]> children) {
+	public StorageId writeChildren(StorageId[] children) {
 		JSONObject tmp = new JSONObject();
 		try {
-			for (Map.Entry<String, StorageId[]> entry : children.entrySet()) {
-				tmp.put(entry.getKey(), storageIdArrayToJsonArray(entry.getValue()));
-			}
+			tmp.put("children", storageIdArrayToJsonArray(children));
 			StorageId childrenStorageId = generateStorageId();
 			writeFile(childrenStorageId, tmp, FILE_TYPE_CHILDREN);
 			return childrenStorageId;

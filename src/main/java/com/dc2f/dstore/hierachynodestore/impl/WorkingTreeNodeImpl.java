@@ -1,17 +1,15 @@
 package com.dc2f.dstore.hierachynodestore.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
-import com.dc2f.dstore.storage.ChildQueryAdapter;
 import com.dc2f.dstore.storage.MutableStoredFlatNode;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredFlatNode;
+import com.dc2f.dstore.storage.flatjsonfiles.SlowChildQueryAdapter;
 
 public class WorkingTreeNodeImpl implements WorkingTreeNode {
 
@@ -24,16 +22,13 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	/**
 	 * Mapping between a child's name and their node ids.
 	 */
-	private Map<String, StorageId[]> storedChildren = null;
+	private StorageId[] storedChildren = null;
 	
 	/**
-	 * storage for all <strong>loaded</strong> children.
-	 * if a child was removed value is an empty list. if child was not yet loaded, the key won't exist.
-	 * (yep, for SNS (Same Name Siblings, aka multi value children) can only be loaded all children together)
-	 * 
-	 * funny side note: value should never be null. whatever happens.
+	 * storage for all <strong>loaded</strong> children. as soon as we are accessing a single child,
+	 * or have manipulate the children, this will be filled completely.
 	 */
-	Map<String, List<WorkingTreeNode>> children = new HashMap<String, List<WorkingTreeNode>>();
+	List<WorkingTreeNode> children = null;
 	boolean isNew = false;
 	MutableStoredFlatNode mutableStoredNode;
 	private WorkingTreeNodeImpl parentNode;
@@ -48,33 +43,59 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		this.node = flatNode;
 	}
 	
-	Map<String, StorageId[]> getStoredChildren() {
+	StorageId[] getStoredChildren() {
 		if (storedChildren == null) {
 			storedChildren = workingTreeImpl.storageBackend.readChildren(node.getChildren());
 		}
 		if (storedChildren == null) {
-			storedChildren = new HashMap<>();
+			storedChildren = new StorageId[0];
 		}
 		return storedChildren;
 	}
 	
 	@Override
-	public List<WorkingTreeNode> getChild(String childName) {
-		List<WorkingTreeNode> childList = children.get(childName);
-		if (childList == null) {
-			StorageId[] storedChildList = getStoredChildren().get(childName);
-			if (storedChildList != null) {
-				childList = new ArrayList<>(storedChildList.length);
-				for (StorageId storedId : storedChildList) {
-					WorkingTreeNode child = workingTreeImpl.getNodeByStorageId(storedId, this);
-					childList.add(child);
-				}
-			} else {
-				childList = new ArrayList<>();
+	public Iterable<WorkingTreeNode> getChild(String childName) {
+//		SlowChildQueryAdapter queryAdapter = workingTreeImpl.storageBackend.getAdapter(SlowChildQueryAdapter.class);
+//		queryAdapter.getChildren("name", childName);
+//		return null;
+		
+		List<WorkingTreeNode> ret = new ArrayList<>();
+		List<WorkingTreeNode> myChildren = loadChildren();
+		for (WorkingTreeNode child : myChildren) {
+			if (child.getName().equals(childName)) {
+				ret.add(child);
 			}
-			children.put(childName, childList);
 		}
-		return childList;
+		return ret;
+		
+//		List<WorkingTreeNode> childList = children.get(childName);
+//		if (childList == null) {
+//			StorageId[] storedChildList = getStoredChildren().get(childName);
+//			if (storedChildList != null) {
+//				childList = new ArrayList<>(storedChildList.length);
+//				for (StorageId storedId : storedChildList) {
+//					WorkingTreeNode child = workingTreeImpl.getNodeByStorageId(storedId, this);
+//					childList.add(child);
+//				}
+//			} else {
+//				childList = new ArrayList<>();
+//			}
+//			children.put(childName, childList);
+//		}
+//		return childList;
+	}
+	
+	List<WorkingTreeNode> loadChildren() {
+		if (children == null) {
+			StorageId[] storedChildrenId = getStoredChildren();
+			List<WorkingTreeNode> ret = new ArrayList<>(storedChildrenId.length);
+			for (StorageId childId : storedChildren) {
+				WorkingTreeNode child = workingTreeImpl.getNodeByStorageId(childId, this);
+				ret.add(child);
+			}
+			children = ret;
+		}
+		return children;
 	}
 	
 	@Override
@@ -84,12 +105,8 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, childNode, this);
 		child.isNew = true;
 		workingTreeImpl.loadedNodes.put(child.getStorageId(), child);
-		List<WorkingTreeNode> childList = getChild(childName);
-		if (childList == null) {
-			childList = new ArrayList<>();
-			children.put(childName, childList);
-		}
-		childList.add(child);
+		List<WorkingTreeNode> myChildren = loadChildren();
+		myChildren.add(child);
 		changedChildren = true;
 		workingTreeImpl.notifyNodeChanged(this);
 		workingTreeImpl.notifyNodeChanged(child);
@@ -100,18 +117,13 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 
 	@Override
 	public Iterable<String> getChildrenNames() {
-		Set<String> storedNames = getStoredChildren().keySet();
-		HashSet<String> mergedNames = new HashSet<>(storedNames.size());
-		mergedNames.addAll(storedNames);
-		for (Map.Entry<String, List<WorkingTreeNode>> entry : children.entrySet()) {
-			if (entry.getValue().size() == 0) {
-				// children were removed.
-				mergedNames.remove(entry.getKey());
-			} else {
-				mergedNames.add(entry.getKey());
-			}
+		List<WorkingTreeNode> myChildren = loadChildren();
+		Set<String> ret = new HashSet<>(myChildren.size());
+		for (WorkingTreeNode child : myChildren) {
+			ret.add(child.getName());
 		}
-		return mergedNames;
+		
+		return ret;
 	}
 
 	@Override

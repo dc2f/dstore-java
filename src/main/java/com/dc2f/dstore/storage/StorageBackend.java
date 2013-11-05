@@ -1,6 +1,6 @@
 package com.dc2f.dstore.storage;
 
-import java.util.Map;
+
 
 /**
  * Backend for storing flat node data.
@@ -33,9 +33,9 @@ public interface StorageBackend {
 	
 	StoredFlatNode writeNode(StoredFlatNode node);
 	
-	Map<String, StorageId[]> readChildren(StorageId childrenStorageId);
+	StorageId[] readChildren(StorageId childrenStorageId);
 	
-	StorageId writeChildren(Map<String, StorageId[]> children);
+	StorageId writeChildren(StorageId[] children);
 	
 	<T extends StorageAdapter>T getAdapter(Class<T> adapterInterface);
 

@@ -8,6 +8,9 @@ package com.dc2f.dstore.storage;
  * 
  * Storage ids must always be created by the storage backend and are not
  * interchangeable between storage implementations.
+ * 
+ * StorageIds MUST have a useful .hashCode and .equals implementation.
+ * TODO: We should probably define them to be Serializable, because it should be usable as a cache key!
  */
 public interface StorageId {
 	

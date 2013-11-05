@@ -1,7 +1,5 @@
 package com.dc2f.dstore.hierachynodestore;
 
-import java.util.List;
-
 import com.google.common.base.Strings;
 
 public class WorkingTreeUtils {
@@ -17,7 +15,7 @@ public class WorkingTreeUtils {
 		builder.append(LINE_SEPARATOR);
 		
 		for (String childName : rootNode.getChildrenNames()) {
-			List<WorkingTreeNode> childList = rootNode.getChild(childName);
+			Iterable<WorkingTreeNode> childList = rootNode.getChild(childName);
 			for (WorkingTreeNode child : childList) {
 				debugRecursiveTree(child, builder, depth+1);
 			}

@@ -82,7 +82,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	
 	@Override
 	public WorkingTreeNode addChild(String childName) {
-		StoredFlatNode childNode = new StoredFlatNode(workingTreeImpl.storageBackend.generateUniqueId(),
+		StoredFlatNode childNode = new StoredFlatNode(workingTreeImpl.storageBackend.generateStorageId(),
 				childName, node.getStorageId(), null, null);
 		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, childNode);
 		child.isNew = true;

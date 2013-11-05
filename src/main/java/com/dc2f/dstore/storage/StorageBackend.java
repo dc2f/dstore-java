@@ -2,14 +2,24 @@ package com.dc2f.dstore.storage;
 
 import java.util.Map;
 
-import com.dc2f.dstore.storage.simple.SimpleUUIDStorageId;
-
+/**
+ * Backend for storing flat node data.
+ * 
+ * A storage backend only needs to be able to deal with storage ids
+ * created by its own methods. So it is safe to cast input storage
+ * ids to its own StorageId implementation.
+ */
 public interface StorageBackend {
 	
 	/**
 	 * generates a new unique id.
 	 */
-	public StorageId generateUniqueId();
+	public StorageId generateStorageId();
+	
+	/**
+	 * Creates a storage id from the given global id string for this store.
+	 */
+	public StorageId storageIdFromString(String idString);
 	
 	public StoredCommit readCommit(StorageId id);
 	
@@ -22,8 +32,6 @@ public interface StorageBackend {
 	StoredFlatNode readNode(StorageId id);
 	
 	StoredFlatNode writeNode(StoredFlatNode node);
-
-	public SimpleUUIDStorageId getDefaultRootCommitId();
 	
 	Map<String, StorageId[]> readChildren(StorageId childrenStorageId);
 	

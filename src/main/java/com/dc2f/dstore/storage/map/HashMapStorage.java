@@ -1,8 +1,11 @@
 package com.dc2f.dstore.storage.map;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
@@ -113,9 +116,14 @@ public class HashMapStorage implements StorageBackend {
 		return storageId;
 	}
 
-	@Override
+	@SuppressWarnings("null")
+	@Override @Nonnull
 	public Map<String, Property> readProperties(StorageId propertiesStorageId) {
-		return this.storedProperties.get(propertiesStorageId);
+		Map<String, Property> ret = this.storedProperties.get(propertiesStorageId);
+		if (ret == null) {
+			return Collections.emptyMap();
+		}
+		return ret;
 	}
 
 }

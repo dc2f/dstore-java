@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -218,7 +220,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 		return propertyId;
 	}
 
-	@Override
+	@Override @Nonnull
 	public Map<String, Property> readProperties(StorageId propertiesStorageId) {
 		JSONObject tmp = readFile(propertiesStorageId, FILE_TYPE_PROPERTIES);
 		Map<String, Property> props = new HashMap<String, Property>();

@@ -9,9 +9,13 @@ import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageId;
 
 public interface WorkingTreeNode {
+	@Nonnull
 	WorkingTreeNode addChild(String childName);
 	
-	Iterable<String> getChildrenNames();
+	
+	@Nonnull
+	Iterable<WorkingTreeNode> getChildren();
+	int getChildrenCount();
 
 	String getName();
 

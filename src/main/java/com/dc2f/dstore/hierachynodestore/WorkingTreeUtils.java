@@ -14,11 +14,8 @@ public class WorkingTreeUtils {
 		builder.append(")");
 		builder.append(LINE_SEPARATOR);
 		
-		for (String childName : rootNode.getChildrenNames()) {
-			Iterable<WorkingTreeNode> childList = rootNode.getChild(childName);
-			for (WorkingTreeNode child : childList) {
-				debugRecursiveTree(child, builder, depth+1);
-			}
+		for (WorkingTreeNode child : rootNode.getChildren()) {
+			debugRecursiveTree(child, builder, depth+1);
 		}
 	}
 	public static String debugRecursiveTree(WorkingTreeNode rootNode) {

@@ -2,10 +2,8 @@ package com.dc2f.dstore.hierachynodestore.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -98,20 +96,22 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 //		return childList;
 	}
 	
+	@Nonnull
 	List<WorkingTreeNode> loadChildren() {
-		if (children == null) {
+		List<WorkingTreeNode> ret = children;
+		if (ret == null) {
 			StorageId[] storedChildrenId = getStoredChildren();
-			List<WorkingTreeNode> ret = new ArrayList<>(storedChildrenId.length);
+			ret = new ArrayList<>(storedChildrenId.length);
 			for (StorageId childId : storedChildren) {
 				WorkingTreeNode child = workingTreeImpl.getNodeByStorageId(childId, this);
 				ret.add(child);
 			}
 			children = ret;
 		}
-		return children;
+		return ret;
 	}
 	
-	@Override
+	@Override @Nonnull
 	public WorkingTreeNode addChild(String childName) {
 		StorageId propertiesId = workingTreeImpl.storageBackend.writeProperties(
 				Collections.singletonMap(Property.PROPERTY_NAME, new Property(childName)));
@@ -130,15 +130,26 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		return child;
 	}
 
+//	@Override
+//	public Iterable<String> getChildrenNames() {
+//		List<WorkingTreeNode> myChildren = loadChildren();
+//		Set<String> ret = new HashSet<>(myChildren.size());
+//		for (WorkingTreeNode child : myChildren) {
+//			ret.add(child.getName());
+//		}
+//		
+//		return ret;
+//	}
+	
 	@Override
-	public Iterable<String> getChildrenNames() {
-		List<WorkingTreeNode> myChildren = loadChildren();
-		Set<String> ret = new HashSet<>(myChildren.size());
-		for (WorkingTreeNode child : myChildren) {
-			ret.add(child.getName());
-		}
-		
-		return ret;
+	@Nonnull
+	public Iterable<WorkingTreeNode> getChildren() {
+		return loadChildren();
+	}
+	
+	@Override
+	public int getChildrenCount() {
+		return loadChildren().size();
 	}
 	
 	@Nullable

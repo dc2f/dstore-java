@@ -12,11 +12,11 @@ import com.dc2f.dstore.storage.map.HashMapStorage;
 
 public class SimpleExample {
 	public static void main(String[] args) {
-//		HierarchicalNodeStore nodeStore = new HierarchicalNodeStore(new HashMapStorage());
-//		writeToStore(nodeStore);
+		HierarchicalNodeStore nodeStore = new HierarchicalNodeStore(new HashMapStorage());
+		writeToStore(nodeStore);
 		
-		SlowJsonFileStorageBackend persistentNodeStore = new SlowJsonFileStorageBackend(new File("tmpwd"));
-		writeToStore(new HierarchicalNodeStore(persistentNodeStore));
+//		SlowJsonFileStorageBackend persistentNodeStore = new SlowJsonFileStorageBackend(new File("tmpwd"));
+//		writeToStore(new HierarchicalNodeStore(persistentNodeStore));
 	}
 	
 	public static void writeToStore(HierarchicalNodeStore nodeStore) {

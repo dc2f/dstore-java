@@ -1,7 +1,6 @@
 package com.dc2f.dstore.hierachynodestore;
 
 import java.util.Collections;
-import java.util.HashMap;
 
 import com.dc2f.dstore.hierachynodestore.impl.WorkingTreeImpl;
 import com.dc2f.dstore.storage.Property;

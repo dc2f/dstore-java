@@ -68,13 +68,14 @@ public class WorkingTreeImpl implements WorkingTree {
 		Set<WorkingTreeNodeImpl> nodesToUpdate = findNodesToUpdate();
 //		System.out.println("nodesToUpdate: " + nodesToUpdate + " (" + changedNodes + ")");
 		// give the ones to update a new id before storing, otherwise child ids won't match
+		// FIXME: move mutable stored node into this method (e.g. by using a map)
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
 			if (!node.isNew) {
 				node.createMutableStoredNode(storageBackend.generateStorageId());
 //				node.node.setStorageId();
 			} else {
 				// this should be done differently.. new nodes should always have a mutable stored node..
-				node.createMutableStoredNode(node.node.getStorageId());
+				node.createMutableStoredNode(node.storedNode.getStorageId());
 			}
 		}
 
@@ -106,12 +107,13 @@ public class WorkingTreeImpl implements WorkingTree {
 //				node.mutableStoredNode.setParentId(parent.node.getStorageId());
 ////				throw new RuntimeException("we have to recursively change parent id, and mutableStorageNode must therefore never be null." + parent);
 //			}
-			node.node = storageBackend.writeNode(node.mutableStoredNode);
+			node.storedNode = storageBackend.writeNode(node.mutableStoredNode);
 			node.isNew = false;
 			node.mutableStoredNode = null;
 			node.changedChildren = false;
 			node.changedProperties = false;
 			changedNodes.remove(node);
+			loadedNodes.put(node.getStorageId(), node);
 		}
 		if (!changedNodes.isEmpty()) {
 			// i think if nodes are deleted/detached, changedNodes might not get empty..

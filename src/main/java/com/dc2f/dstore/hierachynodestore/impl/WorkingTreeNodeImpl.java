@@ -19,7 +19,7 @@ import com.dc2f.dstore.storage.StoredFlatNode;
 public class WorkingTreeNodeImpl implements WorkingTreeNode {
 
 	private WorkingTreeImpl workingTreeImpl;
-	StoredFlatNode node;
+	StoredFlatNode storedNode;
 	
 	boolean changedChildren = false;
 	boolean changedProperties = false;
@@ -46,12 +46,12 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		if (flatNode == null) {
 			throw new IllegalArgumentException("flatNode must not be null.");
 		}
-		this.node = flatNode;
+		this.storedNode = flatNode;
 	}
 	
 	StorageId[] getStoredChildren() {
 		if (storedChildren == null) {
-			storedChildren = workingTreeImpl.storageBackend.readChildren(node.getChildren());
+			storedChildren = workingTreeImpl.storageBackend.readChildren(storedNode.getChildren());
 		}
 		if (storedChildren == null) {
 			storedChildren = new StorageId[0];
@@ -143,7 +143,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	@Nonnull Map<String, Property> loadProperties() {
 		Map<String, Property> ret = loadedProperties;
 		if (ret == null) {
-			ret = loadedProperties = new HashMap<String, Property>(workingTreeImpl.storageBackend.readProperties(node.getProperties()));
+			ret = loadedProperties = new HashMap<String, Property>(workingTreeImpl.storageBackend.readProperties(storedNode.getProperties()));
 			changedProperties = false;
 		}
 		return ret;
@@ -173,7 +173,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	
 	@Nullable
 	public Property getProperty(String propertyName) {
-		Map<String, Property> properties = workingTreeImpl.storageBackend.readProperties(node.getProperties());
+		Map<String, Property> properties = workingTreeImpl.storageBackend.readProperties(storedNode.getProperties());
 		return properties.get(propertyName);
 	}
 	
@@ -204,7 +204,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	}
 
 	public void createMutableStoredNode(StorageId generateUniqueId) {
-		mutableStoredNode = new MutableStoredFlatNode(generateUniqueId, node);
+		mutableStoredNode = new MutableStoredFlatNode(generateUniqueId, storedNode);
 	}
 
 	@Override
@@ -212,7 +212,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		if (mutableStoredNode != null) {
 			return mutableStoredNode.getStorageId();
 		}
-		return node.getStorageId();
+		return storedNode.getStorageId();
 	}
 	
 	

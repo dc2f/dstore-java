@@ -1,5 +1,8 @@
 package com.dc2f.dstore.hierachynodestore;
 
+import java.util.Map;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.dc2f.dstore.storage.Property;
@@ -14,6 +17,9 @@ public interface WorkingTreeNode {
 
 	@Nullable
 	Property getProperty(String name);
+	
+	@Nonnull
+	Map<String, Property> getProperties();	
 	
 	Iterable<WorkingTreeNode> getChild(String childName);
 

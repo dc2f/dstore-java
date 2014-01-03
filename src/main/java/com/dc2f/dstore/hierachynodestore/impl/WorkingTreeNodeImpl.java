@@ -151,7 +151,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	 * Get all properties of the node as map.
 	 * @return Map of property names to property.
 	 */
-	@Nonnull
+	@Override @Nonnull
 	public Map<String, Property> getProperties() {
 		return workingTreeImpl.storageBackend.readProperties(node.getProperties());
 	}

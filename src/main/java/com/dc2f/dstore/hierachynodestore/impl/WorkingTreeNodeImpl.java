@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
@@ -144,6 +145,15 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	public Property getProperty(String propertyName) {
 		Map<String, Property> properties = workingTreeImpl.storageBackend.readProperties(node.getProperties());
 		return properties.get(propertyName);
+	}
+	
+	/**
+	 * Get all properties of the node as map.
+	 * @return Map of property names to property.
+	 */
+	@Nonnull
+	public Map<String, Property> getProperties() {
+		return workingTreeImpl.storageBackend.readProperties(node.getProperties());
 	}
 	
 	@Override

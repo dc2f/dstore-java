@@ -2,6 +2,8 @@ package com.dc2f.dstore.storage;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 
 
@@ -43,6 +45,7 @@ public interface StorageBackend {
 	
 	StorageId writeProperties(Map<String, Property> properties);
 
+	@Nonnull
 	Map<String, Property> readProperties(StorageId propertiesStorageId);
 	
 	

@@ -13,7 +13,6 @@ import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.storage.MutableStoredFlatNode;
 import com.dc2f.dstore.storage.Property;
-import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredFlatNode;
 
@@ -142,11 +141,11 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	}
 	
 	@Nullable
-	private Property getProperty(String propertyName) {
+	public Property getProperty(String propertyName) {
 		Map<String, Property> properties = workingTreeImpl.storageBackend.readProperties(node.getProperties());
 		return properties.get(propertyName);
 	}
-
+	
 	@Override
 	public String getName() {
 		Property nameProperty = getProperty(Property.PROPERTY_NAME);

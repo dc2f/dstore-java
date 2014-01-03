@@ -56,17 +56,24 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	@Override
 	public Iterable<WorkingTreeNode> getChild(String childName) {
 		ChildQueryAdapter queryAdapter = workingTreeImpl.storageBackend.getAdapter(ChildQueryAdapter.class);
-		queryAdapter.getChildren("name", childName);
-//		return null;
 		
+		Iterable<StorageId> flatChildrenIds = queryAdapter.getChildren(this.getStorageId(), "name", childName);
 		List<WorkingTreeNode> ret = new ArrayList<>();
-		List<WorkingTreeNode> myChildren = loadChildren();
-		for (WorkingTreeNode child : myChildren) {
-			if (child.getName().equals(childName)) {
-				ret.add(child);
-			}
+		for (StorageId flatChildId : flatChildrenIds) {
+			ret.add(workingTreeImpl.getNodeByStorageId(flatChildId, this));
 		}
 		return ret;
+		
+//		return null;
+		
+//		List<WorkingTreeNode> ret = new ArrayList<>();
+//		List<WorkingTreeNode> myChildren = loadChildren();
+//		for (WorkingTreeNode child : myChildren) {
+//			if (child.getName().equals(childName)) {
+//				ret.add(child);
+//			}
+//		}
+//		return ret;
 		
 //		List<WorkingTreeNode> childList = children.get(childName);
 //		if (childList == null) {

@@ -68,7 +68,6 @@ public class WorkingTreeImpl implements WorkingTree {
 //		System.out.println("nodesToUpdate: " + nodesToUpdate + " (" + changedNodes + ")");
 		// give the ones to update a new id before storing, otherwise child ids won't match
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
-			
 			if (!node.isNew) {
 				node.createMutableStoredNode(storageBackend.generateStorageId());
 //				node.node.setStorageId();

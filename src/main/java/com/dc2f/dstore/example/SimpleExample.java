@@ -7,6 +7,7 @@ import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeUtils;
+import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.flatjsonfiles.SlowJsonFileStorageBackend;
 import com.dc2f.dstore.storage.map.HashMapStorage;
 
@@ -51,6 +52,7 @@ public class SimpleExample {
 		analyze("wt2 must not see any changes", wt2);
 		
 		b1.addChild("B11");
+		b1.setProperty("testproperty", new Property("Hello World"));
 		Commit c3 = wt1.commit("");
 		
 		analyze("(3) B1, B, and root node must have changed after adding B11", wt1);

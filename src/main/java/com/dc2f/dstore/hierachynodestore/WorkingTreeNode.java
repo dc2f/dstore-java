@@ -22,6 +22,8 @@ public interface WorkingTreeNode {
 	@Nullable
 	Property getProperty(String name);
 	
+	void setProperty(@Nonnull String name, @Nonnull Property value);
+	
 	@Nonnull
 	Map<String, Property> getProperties();	
 	

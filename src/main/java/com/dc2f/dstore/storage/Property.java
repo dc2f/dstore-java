@@ -94,4 +94,9 @@ public class Property {
 	public Object getObjectValue() {
 		return objValue;
 	}
+	
+	@Override
+	public String toString() {
+		return objValue.toString();
+	}
 }

@@ -2,6 +2,7 @@ package com.dc2f.dstore.hierachynodestore.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	boolean isNew = false;
 	MutableStoredFlatNode mutableStoredNode;
 	private WorkingTreeNodeImpl parentNode;
+	private Map<String, Property> loadedProperties;
 
 	public WorkingTreeNodeImpl(WorkingTreeImpl workingTreeImpl,
 			StoredFlatNode flatNode, WorkingTreeNodeImpl parentNode) {
@@ -129,6 +131,23 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 
 		return child;
 	}
+	
+	public void setProperty(@Nonnull String propertyName, @Nonnull Property property) {
+		// make sure properties are loaded.
+		loadProperties();
+		loadedProperties.put(propertyName, property);
+		changedProperties = true;
+		workingTreeImpl.notifyNodeChanged(this);
+	}
+	
+	@Nonnull Map<String, Property> loadProperties() {
+		Map<String, Property> ret = loadedProperties;
+		if (ret == null) {
+			ret = loadedProperties = new HashMap<String, Property>(workingTreeImpl.storageBackend.readProperties(node.getProperties()));
+			changedProperties = false;
+		}
+		return ret;
+	}
 
 //	@Override
 //	public Iterable<String> getChildrenNames() {
@@ -164,7 +183,11 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	 */
 	@Override @Nonnull
 	public Map<String, Property> getProperties() {
-		return workingTreeImpl.storageBackend.readProperties(node.getProperties());
+		Map<String, Property> ret = Collections.unmodifiableMap(loadProperties());
+		if (ret == null) {
+			throw new IllegalStateException();
+		}
+		return ret;
 	}
 	
 	@Override

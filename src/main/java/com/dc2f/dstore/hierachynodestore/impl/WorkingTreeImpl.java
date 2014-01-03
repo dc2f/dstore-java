@@ -11,6 +11,7 @@ import com.dc2f.dstore.hierachynodestore.Commit;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
+import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
@@ -90,6 +91,11 @@ public class WorkingTreeImpl implements WorkingTree {
 				node.mutableStoredNode.setChildren(
 						storageBackend.writeChildren(childStorageIds));
 			}
+			if (node.changedProperties) {
+				Map<String, Property> nodeProperties = node.loadProperties();
+				StorageId nodePropertiesId = storageBackend.writeProperties(nodeProperties);
+				node.mutableStoredNode.setProperties(nodePropertiesId);
+			}
 //			node.node = new StoredFlatNode(node.mutableStoredNode);
 //			WorkingTreeNodeImpl parent = node.getParent();
 //			// parent must always be mutable right here?!
@@ -104,6 +110,7 @@ public class WorkingTreeImpl implements WorkingTree {
 			node.isNew = false;
 			node.mutableStoredNode = null;
 			node.changedChildren = false;
+			node.changedProperties = false;
 			changedNodes.remove(node);
 		}
 		if (!changedNodes.isEmpty()) {
@@ -157,7 +164,7 @@ public class WorkingTreeImpl implements WorkingTree {
 //						System.out.println("found the root node. " + changed);
 						toUpdate.addAll(changed);
 					} else {
-						System.out.println("node is detached from root node." + node + " (" + node.getStorageId() + ")");
+						System.out.println("node is detached from root node." + node + " (" + node.getStorageId() + ") / root: (" + getRootNode().getStorageId() + ")");
 					}
 					break;
 				}

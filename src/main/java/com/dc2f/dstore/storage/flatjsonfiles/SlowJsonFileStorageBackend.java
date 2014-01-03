@@ -3,6 +3,7 @@ package com.dc2f.dstore.storage.flatjsonfiles;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -220,6 +221,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 		return propertyId;
 	}
 
+	@SuppressWarnings("null")
 	@Override @Nonnull
 	public Map<String, Property> readProperties(StorageId propertiesStorageId) {
 		JSONObject tmp = readFile(propertiesStorageId, FILE_TYPE_PROPERTIES);
@@ -233,7 +235,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 				logger.error("This should never happen, as we only iterate through existing properties.", e);
 			}
 		}
-		return props;
+		return Collections.unmodifiableMap(props);
 	}
 	
 	

@@ -1,5 +1,8 @@
 package com.dc2f.dstore.hierachynodestore;
 
+import java.util.Map;
+
+import com.dc2f.dstore.storage.Property;
 import com.google.common.base.Strings;
 
 public class WorkingTreeUtils {
@@ -12,6 +15,9 @@ public class WorkingTreeUtils {
 		builder.append(" (");
 		builder.append(rootNode.getStorageId().getIdString());
 		builder.append(")");
+		Map<String, Property> props = rootNode.getProperties();
+		builder.append(" props=");
+		builder.append(props.toString());
 		builder.append(LINE_SEPARATOR);
 		
 		for (WorkingTreeNode child : rootNode.getChildren()) {

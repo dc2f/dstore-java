@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
+import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
@@ -25,7 +26,7 @@ public class HashMapStorage implements StorageBackend {
 	Map<StorageId, StoredCommit> storedCommit = new HashMap<>();
 	Map<StorageId, StoredFlatNode> storedNodes = new HashMap<>();
 	Map<StorageId, StorageId[]> storedChildren = new HashMap<>();
-	Map<StorageId, Map<String, StoredProperty[]>> storedProperties = new HashMap<>();
+	Map<StorageId, Map<String, Property>> storedProperties = new HashMap<>();
 	
 	HashSet<StorageId> generatedStorageIds = new HashSet<>();
 
@@ -103,6 +104,18 @@ public class HashMapStorage implements StorageBackend {
 			return (T) new SlowChildQueryAdapter(this);
 		}
 		return null;
+	}
+
+	@Override
+	public StorageId writeProperties(Map<String, Property> properties) {
+		StorageId storageId = generateStorageId();
+		this.storedProperties.put(storageId, properties);
+		return storageId;
+	}
+
+	@Override
+	public Map<String, Property> readProperties(StorageId propertiesStorageId) {
+		return this.storedProperties.get(propertiesStorageId);
 	}
 
 }

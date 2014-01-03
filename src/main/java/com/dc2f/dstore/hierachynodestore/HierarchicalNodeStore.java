@@ -1,6 +1,10 @@
 package com.dc2f.dstore.hierachynodestore;
 
+import java.util.Collections;
+import java.util.HashMap;
+
 import com.dc2f.dstore.hierachynodestore.impl.WorkingTreeImpl;
+import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
@@ -26,10 +30,14 @@ public class HierarchicalNodeStore {
 		StorageId rootCommitId = storageBackend.storageIdFromString(ROOT_COMMIT_ID);
 		StoredCommit rootCommit = storageBackend.readCommit(rootCommitId);
 		if (rootCommit == null) {
-			StoredFlatNode storedRootNode = new StoredFlatNode(storageBackend.generateStorageId(), ROOT_NODE_NAME, null, null);
+			Property prop = new Property(ROOT_NODE_NAME);
+			StorageId propertiesId = storageBackend.writeProperties(Collections.singletonMap(Property.PROPERTY_NAME, prop));
+
+			StoredFlatNode storedRootNode = new StoredFlatNode(storageBackend.generateStorageId(), null, propertiesId);
 			rootCommit = new StoredCommit(rootCommitId, null, storedRootNode.getStorageId());
 			storageBackend.writeNode(storedRootNode);
 			storageBackend.writeCommit(rootCommit);
+			
 			storageBackend.writeBranch(MASTER_BRANCH_NAME, rootCommit);
 		}
 	}

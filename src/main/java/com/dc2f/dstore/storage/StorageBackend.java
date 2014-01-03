@@ -1,5 +1,7 @@
 package com.dc2f.dstore.storage;
 
+import java.util.Map;
+
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 
 
@@ -38,6 +40,11 @@ public interface StorageBackend {
 	StorageId[] readChildren(StorageId childrenStorageId);
 	
 	StorageId writeChildren(StorageId[] children);
+	
+	StorageId writeProperties(Map<String, Property> properties);
+
+	Map<String, Property> readProperties(StorageId propertiesStorageId);
+	
 	
 	<T extends StorageAdapter>T getAdapter(Class<T> adapterInterface);
 

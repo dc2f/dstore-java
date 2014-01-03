@@ -1,8 +1,10 @@
 package com.dc2f.dstore.storage.flatjsonfiles;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
+import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredFlatNode;
@@ -26,8 +28,12 @@ public class SlowChildQueryAdapter implements ChildQueryAdapter {
 		}
 		for (StorageId childId : children) {
 			StoredFlatNode childNode = storageBackend.readNode(childId);
-			if (childNode.getName().equals(value)) {
-				ret.add(childId);
+			Map<String, Property> props = storageBackend.readProperties(childNode.getProperties());
+			Property prop = props.get(property);
+			if (prop != null) {
+				if (prop.getObjectValue().equals(value)) {
+					ret.add(childId);
+				}
 			}
 //			childNode.getProperties()
 		}

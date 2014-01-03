@@ -1,13 +1,19 @@
 package com.dc2f.dstore.hierachynodestore.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.storage.MutableStoredFlatNode;
+import com.dc2f.dstore.storage.Property;
+import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredFlatNode;
 
@@ -107,8 +113,10 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	
 	@Override
 	public WorkingTreeNode addChild(String childName) {
+		StorageId propertiesId = workingTreeImpl.storageBackend.writeProperties(
+				Collections.singletonMap(Property.PROPERTY_NAME, new Property(childName)));
 		StoredFlatNode childNode = new StoredFlatNode(workingTreeImpl.storageBackend.generateStorageId(),
-				childName, null, null);
+				null, propertiesId);
 		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, childNode, this);
 		child.isNew = true;
 		workingTreeImpl.loadedNodes.put(child.getStorageId(), child);
@@ -132,10 +140,20 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		
 		return ret;
 	}
+	
+	@Nullable
+	private Property getProperty(String propertyName) {
+		Map<String, Property> properties = workingTreeImpl.storageBackend.readProperties(node.getProperties());
+		return properties.get(propertyName);
+	}
 
 	@Override
 	public String getName() {
-		return node.getName();
+		Property nameProperty = getProperty(Property.PROPERTY_NAME);
+		if (nameProperty == null) {
+			return null;
+		}
+		return nameProperty.getString();
 	}
 
 	WorkingTreeNodeImpl getParent() {

@@ -3,6 +3,8 @@ package com.dc2f.dstore.storage.flatjsonfiles;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
+import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
@@ -27,6 +30,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 	
 	private static final String FILE_TYPE_MISC = "misc";
 	private static final String FILE_TYPE_CHILDREN = "children";
+	private static final String FILE_TYPE_PROPERTIES = "properties";
 	private static final String FILE_TYPE_NODE = "node";
 	private static final String FILE_TYPE_COMMIT = "commit";
 
@@ -110,16 +114,10 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 
 	@Override
 	public StoredFlatNode readNode(StorageId id) {
-		try {
-			JSONObject obj = readFile(id, FILE_TYPE_NODE);
-			String name = obj.getString("name");
-			StorageId children = readStorageId(obj.optString("children", null));
-			StorageId properties = readStorageId(obj.optString("properties", null));
-			return new StoredFlatNode(id, name, children, properties);
-		} catch (JSONException e) {
-			logger.error("Error reading node.", e);
-			return null;
-		}
+		JSONObject obj = readFile(id, FILE_TYPE_NODE);
+		StorageId children = readStorageId(obj.optString("children", null));
+		StorageId properties = readStorageId(obj.optString("properties", null));
+		return new StoredFlatNode(id, children, properties);
 	}
 	
 	private StorageId readStorageId(String string) {
@@ -140,7 +138,6 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 	public StoredFlatNode writeNode(StoredFlatNode node) {
 		try {
 			JSONObject obj = new JSONObject();
-			obj.put("name", node.getName());
 			obj.put("children", storeStorageId(node.getChildren()));
 			obj.put("properties", storeStorageId(node.getProperties()));
 			writeFile(node.getStorageId(), obj, FILE_TYPE_NODE);
@@ -193,6 +190,50 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 		return null;
 	}
 	
+
+	@Override
+	public StorageId writeProperties(Map<String, Property> properties) {
+		JSONObject tmp = new JSONObject();
+		for (Map.Entry<String, Property> entry : properties.entrySet()) {
+			Property property = entry.getValue();
+			try {
+				switch (property.getPropertyType()) {
+				case STRING:
+					tmp.put(entry.getKey(), property.getString());
+					break;
+				case DOUBLE:
+					tmp.put(entry.getKey(), property.getDouble());
+					break;
+				case LONG:
+					tmp.put(entry.getKey(), property.getLong());
+					break;
+				}
+			} catch (JSONException e) {
+				logger.error("Error while storing property", e);
+				throw new RuntimeException("Error while storing property", e);
+			}
+		}
+		StorageId propertyId = generateStorageId();
+		writeFile(propertyId, tmp, FILE_TYPE_PROPERTIES);
+		return propertyId;
+	}
+
+	@Override
+	public Map<String, Property> readProperties(StorageId propertiesStorageId) {
+		JSONObject tmp = readFile(propertiesStorageId, FILE_TYPE_PROPERTIES);
+		Map<String, Property> props = new HashMap<String, Property>();
+		for (String key : JSONObject.getNames(tmp)) {
+			try {
+				Object value = tmp.get(key);
+				Property prop = new Property(value);
+				props.put(key, prop);
+			} catch (JSONException e) {
+				logger.error("This should never happen, as we only iterate through existing properties.", e);
+			}
+		}
+		return props;
+	}
+	
 	
 	private JSONArray storageIdArrayToJsonArray(
 			StorageId[] children) {
@@ -240,4 +281,5 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 		}
 		return null;
 	}
+
 }

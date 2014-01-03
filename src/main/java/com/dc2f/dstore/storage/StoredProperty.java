@@ -7,7 +7,10 @@ package com.dc2f.dstore.storage;
  * e.g. Date<br><br>
  * Every possible type currently has it's own constructor and it's own set/get method.. which is kind of ugly
  * ... and we always have a String, long and double.. which is probably quite memory intensive..
+ * 
+ * @deprecated use {@link Property} instead.
  */
+@Deprecated
 public class StoredProperty {
 	private String stringValue;
 	private long longValue;

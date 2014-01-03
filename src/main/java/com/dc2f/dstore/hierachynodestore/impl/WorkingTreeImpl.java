@@ -107,6 +107,7 @@ public class WorkingTreeImpl implements WorkingTree {
 //				node.mutableStoredNode.setParentId(parent.node.getStorageId());
 ////				throw new RuntimeException("we have to recursively change parent id, and mutableStorageNode must therefore never be null." + parent);
 //			}
+			loadedNodes.remove(node.storedNode.getStorageId());
 			node.storedNode = storageBackend.writeNode(node.mutableStoredNode);
 			node.isNew = false;
 			node.mutableStoredNode = null;

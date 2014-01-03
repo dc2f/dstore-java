@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import com.dc2f.dstore.storage.ChildQueryAdapter;
-import com.dc2f.dstore.storage.StorageAdapter;
+import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
+import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;

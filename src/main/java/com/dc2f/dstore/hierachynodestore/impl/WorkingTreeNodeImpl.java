@@ -5,11 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.storage.MutableStoredFlatNode;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredFlatNode;
-import com.dc2f.dstore.storage.flatjsonfiles.SlowChildQueryAdapter;
 
 public class WorkingTreeNodeImpl implements WorkingTreeNode {
 
@@ -55,8 +55,8 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	
 	@Override
 	public Iterable<WorkingTreeNode> getChild(String childName) {
-//		SlowChildQueryAdapter queryAdapter = workingTreeImpl.storageBackend.getAdapter(SlowChildQueryAdapter.class);
-//		queryAdapter.getChildren("name", childName);
+		ChildQueryAdapter queryAdapter = workingTreeImpl.storageBackend.getAdapter(ChildQueryAdapter.class);
+		queryAdapter.getChildren("name", childName);
 //		return null;
 		
 		List<WorkingTreeNode> ret = new ArrayList<>();

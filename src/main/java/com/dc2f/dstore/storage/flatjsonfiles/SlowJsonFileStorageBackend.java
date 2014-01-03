@@ -10,8 +10,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dc2f.dstore.storage.ChildQueryAdapter;
-import com.dc2f.dstore.storage.StorageAdapter;
+import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
+import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;

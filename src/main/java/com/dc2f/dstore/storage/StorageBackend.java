@@ -1,5 +1,7 @@
 package com.dc2f.dstore.storage;
 
+import com.dc2f.dstore.hierachynodestore.StorageAdapter;
+
 
 
 /**

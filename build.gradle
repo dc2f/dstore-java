@@ -10,6 +10,11 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'eclipse'
+#apply plugin: 'sonar-runner'
+#apply plugin: 'jacoco'
+
+version = '0.0.1'
+group = 'com.dc2f'
 
 // In this section you declare where to find the dependencies of your project
 repositories {

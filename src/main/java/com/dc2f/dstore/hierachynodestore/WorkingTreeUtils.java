@@ -3,6 +3,7 @@ package com.dc2f.dstore.hierachynodestore;
 import java.util.Map;
 
 import com.dc2f.dstore.storage.Property;
+import com.dc2f.dstore.storage.StorageId;
 import com.google.common.base.Strings;
 
 public class WorkingTreeUtils {
@@ -13,7 +14,8 @@ public class WorkingTreeUtils {
 		builder.append("- ");
 		builder.append(rootNode.getProperty(Property.PROPERTY_NAME));
 		builder.append(" (");
-		builder.append(rootNode.getStorageId().getIdString());
+		StorageId tmpStorageId = rootNode.getStorageId();
+		builder.append(tmpStorageId == null ? "unsaved" : tmpStorageId.getIdString());
 		builder.append(")");
 		Map<String, Property> props = rootNode.getProperties();
 		builder.append(" props=");

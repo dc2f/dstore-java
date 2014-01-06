@@ -21,6 +21,9 @@ public class SlowChildQueryAdapter implements ChildQueryAdapter {
 	@Override
 	public Iterable<StorageId> getChildren(StorageId parent, String property, Object value) {
 		StoredFlatNode parentNode = storageBackend.readNode(parent);
+		if (parentNode == null) {
+			throw new IllegalArgumentException("Unable to find parent node by id {" + parent + "}");
+		}
 		StorageId[] children = storageBackend.readChildren(parentNode.getChildren());
 		ArrayList<StorageId> ret = new ArrayList<StorageId>();
 		if (children == null) {

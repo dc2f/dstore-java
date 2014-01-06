@@ -31,7 +31,10 @@ public interface WorkingTreeNode {
 	@Nonnull
 	Map<String, Property> getProperties();	
 	
-	Iterable<WorkingTreeNode> getChild(String childName);
+	Iterable<WorkingTreeNode> getChildrenByProperty(String propertyName, Object value);
 
-	StorageId getStorageId();
+	/**
+	 * @return the storage id of the node. might return null, if it was not yet committed.
+	 */
+	@Nullable StorageId getStorageId();
 }

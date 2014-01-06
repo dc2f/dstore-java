@@ -2,6 +2,8 @@ package com.dc2f.dstore.storage.simple;
 
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 import com.dc2f.dstore.storage.StorageId;
 
 /**
@@ -15,7 +17,7 @@ public class SimpleStringStorageId implements StorageId {
 		this.id = id;
 	}
 	
-	public static SimpleStringStorageId generateRandom() {
+	public static @Nonnull SimpleStringStorageId generateRandom() {
 		return new SimpleStringStorageId(UUID.randomUUID().toString());
 	}
 

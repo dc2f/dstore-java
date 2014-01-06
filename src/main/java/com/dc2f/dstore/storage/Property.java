@@ -6,7 +6,7 @@ public class Property {
 	/**
 	 * default property name for a "name" property of a node.
 	 */
-	public static final String PROPERTY_NAME = "name";
+	@Nonnull public static final String PROPERTY_NAME = "name";
 	public static enum PropertyType {
 		LONG(Long.class),
 		DOUBLE(Double.class),

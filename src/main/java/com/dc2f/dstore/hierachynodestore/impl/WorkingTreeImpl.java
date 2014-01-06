@@ -11,6 +11,7 @@ import com.dc2f.dstore.hierachynodestore.Commit;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
+import com.dc2f.dstore.storage.MutableStoredFlatNode;
 import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
@@ -66,36 +67,47 @@ public class WorkingTreeImpl implements WorkingTree {
 		}
 		WorkingTreeNode oldRootNode = getRootNode();
 		Set<WorkingTreeNodeImpl> nodesToUpdate = findNodesToUpdate();
+		Map<WorkingTreeNode, MutableStoredFlatNode> storedFlatNodeMappings = new HashMap<>();
 //		System.out.println("nodesToUpdate: " + nodesToUpdate + " (" + changedNodes + ")");
 		// give the ones to update a new id before storing, otherwise child ids won't match
 		// FIXME: move mutable stored node into this method (e.g. by using a map)
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
 			if (!node.isNew) {
-				node.createMutableStoredNode(storageBackend.generateStorageId());
+				// storedNode must not be null, if this is an existing node.
+				StoredFlatNode tmpStoredNode = node.storedNode;
+				assert tmpStoredNode != null;
+				storedFlatNodeMappings.put(node,
+						new MutableStoredFlatNode(storageBackend.generateStorageId(), tmpStoredNode));
+//				node.createMutableStoredNode(storageBackend.generateStorageId());
 //				node.node.setStorageId();
 			} else {
-				// this should be done differently.. new nodes should always have a mutable stored node..
-				node.createMutableStoredNode(node.storedNode.getStorageId());
+				storedFlatNodeMappings.put(node, new MutableStoredFlatNode(storageBackend.generateStorageId()));
 			}
 		}
 
 		// write all changed nodes to storage.
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
+			MutableStoredFlatNode mutableStoredNode = storedFlatNodeMappings.get(node);
 			if (node.changedChildren) {
-				List<WorkingTreeNode> nodeChildren = node.loadChildren();
-				StorageId[] childStorageIds = new StorageId[nodeChildren.size()];
+				Iterable<WorkingTreeNode> nodeChildren = node.getChildren();
+				StorageId[] childStorageIds = new StorageId[node.getChildrenCount()];
 				int i = 0;
 				for (WorkingTreeNode childNode : nodeChildren) {
 					WorkingTreeNodeImpl childNodeImpl = (WorkingTreeNodeImpl) childNode;
-					childStorageIds[i++] = childNodeImpl.getStorageId();
+					MutableStoredFlatNode tmpMutableStoredFlatNode = storedFlatNodeMappings.get(childNodeImpl);
+					if (tmpMutableStoredFlatNode != null) {
+						childStorageIds[i++] = tmpMutableStoredFlatNode.getStorageId();
+					} else {
+						childStorageIds[i++] = childNodeImpl.getStorageId();
+					}
 				}
-				node.mutableStoredNode.setChildren(
+				mutableStoredNode.setChildren(
 						storageBackend.writeChildren(childStorageIds));
 			}
 			if (node.changedProperties) {
 				Map<String, Property> nodeProperties = node.loadProperties();
 				StorageId nodePropertiesId = storageBackend.writeProperties(nodeProperties);
-				node.mutableStoredNode.setProperties(nodePropertiesId);
+				mutableStoredNode.setProperties(nodePropertiesId);
 			}
 //			node.node = new StoredFlatNode(node.mutableStoredNode);
 //			WorkingTreeNodeImpl parent = node.getParent();
@@ -107,10 +119,13 @@ public class WorkingTreeImpl implements WorkingTree {
 //				node.mutableStoredNode.setParentId(parent.node.getStorageId());
 ////				throw new RuntimeException("we have to recursively change parent id, and mutableStorageNode must therefore never be null." + parent);
 //			}
-			loadedNodes.remove(node.storedNode.getStorageId());
-			node.storedNode = storageBackend.writeNode(node.mutableStoredNode);
+			StoredFlatNode oldStoredNode = node.storedNode;
+			if (oldStoredNode != null) {
+				// remove old storage id from cache.
+				loadedNodes.remove(oldStoredNode.getStorageId());
+			}
+			node.storedNode = storageBackend.writeNode(mutableStoredNode);
 			node.isNew = false;
-			node.mutableStoredNode = null;
 			node.changedChildren = false;
 			node.changedProperties = false;
 			changedNodes.remove(node);

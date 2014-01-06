@@ -1,8 +1,13 @@
 package com.dc2f.dstore.storage;
 
+import javax.annotation.Nonnull;
+
 public class MutableStoredFlatNode extends StoredFlatNode {
 
-	public MutableStoredFlatNode(StorageId newStorageId, StoredFlatNode orig) {
+	public MutableStoredFlatNode(@Nonnull StorageId newStorageId) {
+		super(newStorageId, null, null);
+	}
+	public MutableStoredFlatNode(@Nonnull StorageId newStorageId, @Nonnull StoredFlatNode orig) {
 		super(orig);
 		this.storageId = newStorageId;
 	}
@@ -12,9 +17,6 @@ public class MutableStoredFlatNode extends StoredFlatNode {
 //		this.storageId = storageId;
 //	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	public void setChildren(StorageId children) {
 		this.children = children;

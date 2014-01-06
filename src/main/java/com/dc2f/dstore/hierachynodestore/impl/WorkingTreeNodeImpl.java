@@ -189,15 +189,6 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 		}
 		return ret;
 	}
-	
-	@Override
-	public String getName() {
-		Property nameProperty = getProperty(Property.PROPERTY_NAME);
-		if (nameProperty == null) {
-			return null;
-		}
-		return nameProperty.getString();
-	}
 
 	WorkingTreeNodeImpl getParent() {
 		return parentNode;

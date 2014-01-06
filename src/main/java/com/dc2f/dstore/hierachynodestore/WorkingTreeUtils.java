@@ -11,7 +11,7 @@ public class WorkingTreeUtils {
 	private static void debugRecursiveTree(WorkingTreeNode rootNode, StringBuilder builder, int depth) {
 		builder.append(Strings.repeat(" ", depth));
 		builder.append("- ");
-		builder.append(rootNode.getName());
+		builder.append(rootNode.getProperty(Property.PROPERTY_NAME));
 		builder.append(" (");
 		builder.append(rootNode.getStorageId().getIdString());
 		builder.append(")");

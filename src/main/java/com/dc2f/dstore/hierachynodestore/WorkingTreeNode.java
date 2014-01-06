@@ -17,8 +17,6 @@ public interface WorkingTreeNode {
 	Iterable<WorkingTreeNode> getChildren();
 	int getChildrenCount();
 
-	String getName();
-
 	@Nullable
 	Property getProperty(String name);
 	

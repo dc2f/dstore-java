@@ -10,7 +10,7 @@ import com.dc2f.dstore.storage.StoredCommit;
 import com.dc2f.dstore.storage.StoredFlatNode;
 
 /**
- * creates a heirarchical node store based on the flat node storage backend.
+ * creates a hierarchical node store based on the flat node storage backend.
  */
 public class HierarchicalNodeStore {
 	private StorageBackend storageBackend;

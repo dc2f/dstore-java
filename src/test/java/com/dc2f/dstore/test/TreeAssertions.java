@@ -40,6 +40,8 @@ public class TreeAssertions {
 	public static ExpectedNode assertTree(String message, ExpectedNode expected, WorkingTreeNode node) {
 		message = message == null ? "" : message + "; ";
 		
+		assertNotNull("Given WorkingTreeNode must not be null.", node);
+		
 		// check the properties
 		assertEquals(message + "Expected properties count equals actual properties count.", 
 				(long) (expected.properties.length / 2), node.getProperties().size());

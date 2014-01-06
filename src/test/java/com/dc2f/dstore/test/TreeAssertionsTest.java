@@ -1,20 +1,17 @@
 package com.dc2f.dstore.test;
 
-import static com.dc2f.dstore.test.TreeAssertions.*;
+import static com.dc2f.dstore.test.TreeAssertions.assertTree;
+import static com.dc2f.dstore.test.TreeAssertions.node;
+import static com.dc2f.dstore.test.TreeAssertions.properties;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 import org.junit.Test;
 
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.storage.Property;
-import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.test.TreeAssertions.ExpectedNode;
 
 

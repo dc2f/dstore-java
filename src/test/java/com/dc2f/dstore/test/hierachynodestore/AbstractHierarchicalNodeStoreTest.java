@@ -4,13 +4,9 @@ import static com.dc2f.dstore.test.TreeAssertions.assertTree;
 import static com.dc2f.dstore.test.TreeAssertions.node;
 import static com.dc2f.dstore.test.TreeAssertions.properties;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,9 +14,7 @@ import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.storage.StorageBackend;
-import com.dc2f.dstore.storage.flatjsonfiles.SlowJsonFileStorageBackend;
 import com.dc2f.dstore.test.TreeAssertions.ExpectedNode;
-import com.dc2f.utils.FileUtils;
 
 public abstract class AbstractHierarchicalNodeStoreTest {
 

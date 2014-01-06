@@ -22,24 +22,17 @@ import com.dc2f.dstore.storage.flatjsonfiles.SlowJsonFileStorageBackend;
 import com.dc2f.dstore.test.TreeAssertions.ExpectedNode;
 import com.dc2f.utils.FileUtils;
 
-public class HierarchicalNodeStoreTest {
+public abstract class AbstractHierarchicalNodeStoreTest {
 
 	private HierarchicalNodeStore nodeStore;
-	private File jsonStorageFolder;
 	
 	@Before
 	public void setupDstore() throws IOException {
-		jsonStorageFolder = Files.createTempDirectory("dstore-json-test-storage").toFile();
-		StorageBackend storageBackend = new SlowJsonFileStorageBackend(jsonStorageFolder);
+		StorageBackend storageBackend = initStorageBackend();
 		nodeStore = new HierarchicalNodeStore(storageBackend);
 	}
-	
-	@After
-	public void destroyDstore() throws IOException {
-		if(jsonStorageFolder != null && jsonStorageFolder.exists()) {
-			FileUtils.removeRecursive(jsonStorageFolder.toPath());
-		}
-	}
+
+	protected abstract StorageBackend initStorageBackend();
 	
 	@Test
 	public void testWorkingTreeVersions() {

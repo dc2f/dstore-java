@@ -3,6 +3,7 @@ package com.dc2f.dstore.test;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.easymock.EasyMock;
@@ -19,6 +20,10 @@ public class WorkingTreeMockHelper {
 	public WorkingTreeNode getWorkingTreeNode(
 			final HashMap<String, Property> properties) {
 		return getWorkingTreeNode(properties, Arrays.asList(new WorkingTreeNode[0]));
+	}
+	
+	public WorkingTreeNode getWorkingTreeNode(List<WorkingTreeNode> children) {
+		return getWorkingTreeNode(new HashMap<String, Property>(), children);
 	}
 	
 	public WorkingTreeNode getWorkingTreeNode(
@@ -51,4 +56,5 @@ public class WorkingTreeMockHelper {
 		};
 		return id;
 	}
+
 }

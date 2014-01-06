@@ -3,6 +3,7 @@ package com.dc2f.dstore.test.hierachynodestore;
 import static com.dc2f.dstore.test.TreeAssertions.assertTree;
 import static com.dc2f.dstore.test.TreeAssertions.node;
 import static com.dc2f.dstore.test.TreeAssertions.properties;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -58,7 +59,7 @@ public class HierarchicalNodeStoreTest {
 			);
 		
 		assertTree("Changes are visible inside uncommited working tree wt1", expectedAB, root1);
-		assertTrue("Get rootNode() must always return the same root node", root1 == wt1.getRootNode());
+		assertSame("Get rootNode() must always return the same root node", root1, wt1.getRootNode());
 		
 		WorkingTree wt2 = nodeStore.checkoutBranch("master");
 		WorkingTreeNode root2 = wt2.getRootNode();
@@ -66,7 +67,7 @@ public class HierarchicalNodeStoreTest {
 
 		wt1.commit("Commiting wt1, nothing must have changed in already existing working trees");
 		assertTree("root1 data didn't change during commit", expectedAB, root1);
-		assertTrue("Get rootNode() must return the same root node as before commiting", root1 == wt1.getRootNode());
+		assertSame("Get rootNode() must return the same root node as before commiting", root1, wt1.getRootNode());
 		
 		WorkingTree wt3 = nodeStore.checkoutBranch("master");
 		WorkingTreeNode root3 = wt3.getRootNode();

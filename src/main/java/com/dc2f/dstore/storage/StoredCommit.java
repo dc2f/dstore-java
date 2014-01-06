@@ -23,5 +23,4 @@ public class StoredCommit {
 	public StorageId getRootNode() {
 		return rootNode;
 	}
-
 }

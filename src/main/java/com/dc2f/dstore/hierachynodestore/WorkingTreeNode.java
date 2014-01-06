@@ -9,6 +9,12 @@ import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageId;
 
 public interface WorkingTreeNode {
+	
+	/**
+	 * Create a child with the given name to this node.
+	 * @param childName - name of the child to create.
+	 * @return the created child for this node
+	 */
 	@Nonnull
 	WorkingTreeNode addChild(String childName);
 	

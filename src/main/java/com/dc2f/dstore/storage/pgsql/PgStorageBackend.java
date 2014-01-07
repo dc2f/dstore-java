@@ -1,7 +1,8 @@
 package com.dc2f.dstore.storage.pgsql;
 
 import java.beans.PropertyVetoException;
-import java.sql.Connection;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +17,6 @@ import javax.annotation.Nonnull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.postgresql.ds.common.PGObjectFactory;
 import org.postgresql.util.PGobject;
 
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
@@ -70,29 +70,56 @@ public class PgStorageBackend implements StorageBackend {
 			datasource.setPassword(password);
 			
 			sql = new SQL(datasource);
+			createSchemaIfNotExisting();
 		} catch (PropertyVetoException e) {
 			throw new RuntimeException("Error initializing the datasource", e);
 		}
 	}
 	
 	/**
-	 * Removes all entries from the database.
+	 * Creates the database schema if it is not existing.
 	 */
-	public void clearDatabase() {
-		sql.withConnection(new ConnectionExecutor<Void>() {
+	protected void createSchemaIfNotExisting() {
+		boolean existing = sql.withStatement("SELECT id FROM Node LIMIT 1", new StatementExecutor<Boolean>() {
 			@Override
-			public Void run(Connection conn) throws SQLException {
-				conn.createStatement().execute("SELECT setval('storageId_seq', 1)");
-				conn.createStatement().executeUpdate("TRUNCATE StorageIdMapping CASCADE");
-				conn.createStatement().executeUpdate("TRUNCATE Branch CASCADE");
-				conn.createStatement().executeUpdate("TRUNCATE CommitHistory CASCADE");
-				conn.createStatement().executeUpdate("TRUNCATE Commit CASCADE");
-				conn.createStatement().executeUpdate("TRUNCATE NodeChildren CASCADE");
-				conn.createStatement().executeUpdate("TRUNCATE Properties CASCADE");
-				conn.createStatement().executeUpdate("TRUNCATE Node CASCADE");
-				return null;
+			public Boolean run(PreparedStatement stmt) throws SQLException {
+				try {
+					stmt.execute();
+					return true;
+				} catch (SQLException e) {
+					// we have an exception when the node table doesn't exist
+					return false;
+				}
 			}
 		});
+		
+		if(!existing) {
+			createSchema();
+		}
+	}
+	
+	/**
+	 * Drops all tables and other database entities.
+	 */
+	public void dropSchema() {
+		try {
+			InputStream in = this.getClass().getClassLoader().getResource("com/dc2f/dstore/storage/pgsql/destroy_schema.sql").openStream();
+			sql.executeScript(in);
+		} catch (IOException e) {
+			throw new RuntimeException("Error while destroying schema", e);
+		}
+	}
+	
+	/**
+	 * Creates all tables and other needed database entities.
+	 */
+	public void createSchema() {
+		try {
+			InputStream in = this.getClass().getClassLoader().getResource("com/dc2f/dstore/storage/pgsql/setup_schema.sql").openStream();
+			sql.executeScript(in);
+		} catch (IOException e) {
+			throw new RuntimeException("Error while creating schema", e);
+		}
 	}
 	
 	/**
@@ -114,6 +141,7 @@ public class PgStorageBackend implements StorageBackend {
 	 * @param id The id to wrap in a storage id.
 	 * @return The wrapped storage id.
 	 */
+	@Nonnull
 	private WrappedStorageId<Long> id(Long id) {
 		return new WrappedStorageId<Long>(id);
 	}
@@ -167,7 +195,7 @@ public class PgStorageBackend implements StorageBackend {
 					stmt.execute();
 					
 					Long id, rootNode;
-					String message;
+					// String message;
 					List<WrappedStorageId<Long>> parents = new LinkedList<>();
 					
 					try(ResultSet rs = stmt.getResultSet()) {
@@ -177,7 +205,7 @@ public class PgStorageBackend implements StorageBackend {
 						
 						id = rs.getLong("id");
 						rootNode = rs.getLong("rootNodeId");
-						message = rs.getString("message");
+						// message = rs.getString("message");
 						do {
 							Long parentId = rs.getLong("parentId");
 							if(parentId != null) {
@@ -213,32 +241,56 @@ public class PgStorageBackend implements StorageBackend {
 
 	@Override
 	public StoredCommit readBranch(final String name) {
-		Long commitId = sql.withStatement("SELECT commitId FROM Branch WHERE name = ?", new StatementExecutor<Long>() {
+		StorageId commitId = sql.withStatement("SELECT commitId FROM Branch WHERE name = ?", new StatementExecutor<StorageId>() {
 			@Override
-			public Long run(PreparedStatement stmt) throws SQLException {
+			public StorageId run(PreparedStatement stmt) throws SQLException {
 				stmt.setString(1, name);
 				stmt.execute();
 				try(ResultSet rs = stmt.getResultSet()) {
-					rs.next();
-					return rs.getLong("commitId");
+					if(!rs.next()) {
+						return null;
+					}
+					
+					return id(rs.getLong("commitId"));
 				}
 			}
 		});
-		return readCommit(new WrappedStorageId<Long>(commitId));
+		return readCommit(commitId);
 	}
 
 	@Override
-	public void writeBranch(final String name, final StoredCommit commit) {
-		sql.withStatement("INSERT INTO Branch (id, name, commitId) VALUES (?, ?, ?)", new StatementExecutor<Void>() {
+	public synchronized void writeBranch(final String name, final StoredCommit commit) {
+		boolean exists = sql.withStatement("SELECT id FROM Branch WHERE name = ?", new StatementExecutor<Boolean>() {
 			@Override
-			public Void run(PreparedStatement stmt) throws SQLException {
-				stmt.setLong(1, id(generateStorageId()));
-				stmt.setString(2, name);
-				stmt.setLong(3, id(commit.getId()));
-				stmt.executeUpdate();
-				return null;
+			public Boolean run(PreparedStatement stmt) throws SQLException {
+				stmt.setString(1, name);
+				stmt.execute();
+				return stmt.getResultSet().next();
 			}
 		});
+		
+		if(!exists) {
+			sql.withStatement("INSERT INTO Branch (id, name, commitId) VALUES (?, ?, ?)", new StatementExecutor<Void>() {
+				@Override
+				public Void run(PreparedStatement stmt) throws SQLException {
+					stmt.setLong(1, id(generateStorageId()));
+					stmt.setString(2, name);
+					stmt.setLong(3, id(commit.getId()));
+					stmt.executeUpdate();
+					return null;
+				}
+			});
+		} else {
+			sql.withStatement("UPDATE Branch SET commitId = ? WHERE name = ?", new StatementExecutor<Void>() {
+				@Override
+				public Void run(PreparedStatement stmt) throws SQLException {
+					stmt.setLong(1, id(commit.getId()));
+					stmt.setString(2, name);
+					stmt.executeUpdate();
+					return null;
+				}
+			});
+		}
 	}
 
 	@Override
@@ -353,7 +405,7 @@ public class PgStorageBackend implements StorageBackend {
 	@Nonnull
 	public Map<String, Property> readProperties(final StorageId propertiesStorageId) {
 		return sql.withStatement("SELECT properties FROM Properties WHERE id = ?", new StatementExecutor<Map<String, Property>>() {
-			@Override @Nonnull
+			@Override
 			public Map<String, Property> run(PreparedStatement stmt) throws SQLException {
 				stmt.setLong(1, id(propertiesStorageId));
 				stmt.execute();

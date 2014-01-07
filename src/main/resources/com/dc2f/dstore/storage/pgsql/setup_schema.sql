@@ -1,14 +1,3 @@
-﻿/*
-drop table StorageIdMapping;
-drop table Branch;
-drop table CommitHistory;
-drop table Commit;
-drop table Node cascade;
-drop table NodeChildren;
-drop table Properties;
-drop sequence storageId_seq;
-*/
-
 create sequence storageId_seq increment 5000;
 
 create table Properties (
@@ -19,30 +8,30 @@ create table Properties (
 create table Node (
 	id		INT8 PRIMARY KEY,
 	childrenId	INT8, /* reference to node children id */
-	propertiesId	INT8 NOT NULL REFERENCES Properties(id)
+	propertiesId	INT8 NOT NULL /* REFERENCES Properties(id) */
 );
 
 create table NodeChildren (
 	id		INT8,
-	childId		INT8 REFERENCES Node(id),
+	childId		INT8, /* REFERENCES Node(id) */
 	PRIMARY KEY(id, childId)
 );
 
 create table Commit (
 	id		INT8 PRIMARY KEY,
-	rootNodeId	INT8 REFERENCES Node(id),
+	rootNodeId	INT8, /* REFERENCES Node(id) */
 	message		VARCHAR
 );
 
 create table CommitHistory (
-	parentId	INT8 REFERENCES Commit(id),
-	childId		INT8 REFERENCES Commit(id)
+	parentId	INT8, /* REFERENCES Commit(id) */
+	childId		INT8 /* REFERENCES Commit(id) */
 );
 
 create table Branch (
 	id		INT8 PRIMARY KEY,
-	name		VARCHAR,
-	commitId	INT8 REFERENCES Commit(id)
+	name		VARCHAR UNIQUE,
+	commitId	INT8 /* REFERENCES Commit(id) */
 );
 
 create table StorageIdMapping (

@@ -3,6 +3,7 @@ package com.dc2f.dstore.storage;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 
@@ -20,7 +21,7 @@ public interface StorageBackend {
 	/**
 	 * generates a new unique id.
 	 */
-	public StorageId generateStorageId();
+	@Nonnull public StorageId generateStorageId();
 	
 	/**
 	 * Creates a storage id from the given global id string for this store.
@@ -39,7 +40,7 @@ public interface StorageBackend {
 	
 	StoredFlatNode writeNode(StoredFlatNode node);
 	
-	StorageId[] readChildren(StorageId childrenStorageId);
+	@Nullable StorageId[] readChildren(StorageId childrenStorageId);
 	
 	StorageId writeChildren(StorageId[] children);
 	

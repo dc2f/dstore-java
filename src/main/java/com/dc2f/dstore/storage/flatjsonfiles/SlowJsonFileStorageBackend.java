@@ -48,7 +48,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 	}
 
 	@Override
-	public StorageId generateStorageId() {
+	public @Nonnull StorageId generateStorageId() {
 		return SimpleStringStorageId.generateRandom();
 	}
 
@@ -117,6 +117,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 
 	@Override
 	public StoredFlatNode readNode(StorageId id) {
+		System.out.println("Reading node {" + id + "}");
 		JSONObject obj = readFile(id, FILE_TYPE_NODE);
 		StorageId children = readStorageId(obj.optString("children", null));
 		StorageId properties = readStorageId(obj.optString("properties", null));
@@ -140,6 +141,7 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 	@Override
 	public StoredFlatNode writeNode(StoredFlatNode node) {
 		try {
+			System.out.println("Writing node {" + node.getStorageId() + "}");
 			JSONObject obj = new JSONObject();
 			obj.put("children", storeStorageId(node.getChildren()));
 			obj.put("properties", storeStorageId(node.getProperties()));

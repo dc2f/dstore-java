@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
@@ -14,7 +15,6 @@ import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
 import com.dc2f.dstore.storage.StoredFlatNode;
-import com.dc2f.dstore.storage.StoredProperty;
 import com.dc2f.dstore.storage.flatjsonfiles.SlowChildQueryAdapter;
 import com.dc2f.dstore.storage.simple.SimpleStringStorageId;
 
@@ -34,7 +34,7 @@ public class HashMapStorage implements StorageBackend {
 	HashSet<StorageId> generatedStorageIds = new HashSet<>();
 
 	@Override
-	public StorageId generateStorageId() {
+	public @Nonnull StorageId generateStorageId() {
 		// TODO do we need to verify this UUID is really unique? probably not, since we can't
 		// check uniquenes in a distributed environment anyway.. so don't even try to..
 		SimpleStringStorageId tmp = SimpleStringStorageId.generateRandom();
@@ -87,7 +87,7 @@ public class HashMapStorage implements StorageBackend {
 		return newNode;
 	}
 	
-	@Override
+	@Override @Nullable
 	public StorageId[] readChildren(StorageId childrenStorageId) {
 		return storedChildren.get(childrenStorageId);
 	}

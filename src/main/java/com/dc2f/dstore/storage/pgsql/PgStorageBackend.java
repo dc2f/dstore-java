@@ -118,7 +118,7 @@ public class PgStorageBackend implements StorageBackend {
 		return new WrappedStorageId<Long>(id);
 	}
 	
-	@Override
+	@Override @Nonnull
 	public synchronized StorageId generateStorageId() {
 		if(storageId != null) {
 			storageId++;

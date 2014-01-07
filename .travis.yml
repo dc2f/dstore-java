@@ -1,1 +1,8 @@
 language: java
+services:
+  - postgresql
+addons:
+  postgresql: 9.3
+before_script:
+  - psql -c "create user \"dstore-test\" with password 'test';" -U postgres
+  - psql -c "create database \"dstore-test\" with owner = \"dstore-test\" encoding = 'UTF-8';" -U postgres

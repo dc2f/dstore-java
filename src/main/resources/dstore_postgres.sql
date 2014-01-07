@@ -1,11 +1,15 @@
 ﻿/*
+drop table StorageIdMapping;
 drop table Branch;
 drop table CommitHistory;
 drop table Commit;
 drop table Node cascade;
 drop table NodeChildren;
 drop table Properties;
+drop sequence storageId_seq;
 */
+
+create sequence storageId_seq increment 5000;
 
 create table Properties (
 	id		INT8 PRIMARY KEY,
@@ -26,7 +30,7 @@ create table NodeChildren (
 
 create table Commit (
 	id		INT8 PRIMARY KEY,
-	rootNodeId	INT8 REFERENCES Tree(id),
+	rootNodeId	INT8 REFERENCES Node(id),
 	message		VARCHAR
 );
 
@@ -39,4 +43,9 @@ create table Branch (
 	id		INT8 PRIMARY KEY,
 	name		VARCHAR,
 	commitId	INT8 REFERENCES Commit(id)
+);
+
+create table StorageIdMapping (
+	externalId	VARCHAR PRIMARY KEY,
+	internalId	INT8
 );

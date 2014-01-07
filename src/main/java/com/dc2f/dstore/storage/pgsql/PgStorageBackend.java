@@ -1,15 +1,23 @@
 package com.dc2f.dstore.storage.pgsql;
 
 import java.beans.PropertyVetoException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.postgresql.ds.common.PGObjectFactory;
+import org.postgresql.util.PGobject;
 
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 import com.dc2f.dstore.storage.Property;
@@ -67,33 +75,80 @@ public class PgStorageBackend implements StorageBackend {
 		}
 	}
 	
+	/**
+	 * Removes all entries from the database.
+	 */
+	public void clearDatabase() {
+		sql.withConnection(new ConnectionExecutor<Void>() {
+			@Override
+			public Void run(Connection conn) throws SQLException {
+				conn.createStatement().execute("SELECT setval('storageId_seq', 1)");
+				conn.createStatement().executeUpdate("TRUNCATE StorageIdMapping CASCADE");
+				conn.createStatement().executeUpdate("TRUNCATE Branch CASCADE");
+				conn.createStatement().executeUpdate("TRUNCATE CommitHistory CASCADE");
+				conn.createStatement().executeUpdate("TRUNCATE Commit CASCADE");
+				conn.createStatement().executeUpdate("TRUNCATE NodeChildren CASCADE");
+				conn.createStatement().executeUpdate("TRUNCATE Properties CASCADE");
+				conn.createStatement().executeUpdate("TRUNCATE Node CASCADE");
+				return null;
+			}
+		});
+	}
+	
+	/**
+	 * Extract the long value of a storage id.
+	 * @param id The StorageId of which to extract the Long.
+	 * @return The extracted Long value.
+	 */
+	@SuppressWarnings("unchecked")
+	private Long id(StorageId id) {
+		if(id == null) {
+			return null;
+		}
+		
+		return ((WrappedStorageId<Long>) id).getWrappedId();
+	}
+	
+	/**
+	 * Create a WrappedStorageId of a Long.
+	 * @param id The id to wrap in a storage id.
+	 * @return The wrapped storage id.
+	 */
+	private WrappedStorageId<Long> id(Long id) {
+		return new WrappedStorageId<Long>(id);
+	}
+	
 	@Override
 	public synchronized StorageId generateStorageId() {
-		storageId++;
+		if(storageId != null) {
+			storageId++;
+		}
 		if(storageId == null || storageId % storageIdIncrement == 0) {
-			storageId = sql.withStatement("SELECT nextval('storage_id_seq')", new StatementExecutor<Long>() {
+			storageId = sql.withStatement("SELECT nextval('storageId_seq') as id", new StatementExecutor<Long>() {
 				@Override
 				public Long run(PreparedStatement stmt) throws SQLException {
 					stmt.execute();
 					try(ResultSet rs = stmt.getResultSet()) {
 						rs.next();
-						return rs.getLong(0);						
+						return rs.getLong("id");						
 					}
 				}
 			});
 		}
-		return new WrappedStorageId<Long>(storageId);
+		return id(storageId);
 	}
 
 	@Override
-	public StorageId storageIdFromString(String idString) {
-		// FIXME: not implemented
-		throw new RuntimeException("Not implemented");
-	}
-
-	@SuppressWarnings("unchecked")
-	private WrappedStorageId<Long> id(StorageId id) {
-		return (WrappedStorageId<Long>) id;
+	public StorageId storageIdFromString(final String idString) {
+		final StorageId id = generateStorageId();
+		return sql.withStatement("INSERT INTO StorageIdMapping(externalId, internalId) VALUES (?, ?)", new StatementExecutor<StorageId>() {
+			@Override
+			public StorageId run(PreparedStatement stmt) throws SQLException {
+				stmt.setString(1, idString);
+				stmt.setLong(2, id(id));
+				return id;
+			}
+		});
 	}
 	
 	@Override
@@ -108,7 +163,7 @@ public class PgStorageBackend implements StorageBackend {
 			new StatementExecutor<StoredCommit>() {
 				@Override
 				public StoredCommit run(PreparedStatement stmt) throws SQLException {
-					stmt.setLong(1, id(id).getWrappedId());
+					stmt.setLong(1, id(id));
 					stmt.execute();
 					
 					Long id, rootNode;
@@ -132,20 +187,28 @@ public class PgStorageBackend implements StorageBackend {
 					}
 					
 					return new StoredCommit(
-							new WrappedStorageId<Long>(id), 
+							id(id), 
 							parents.toArray(new WrappedStorageId[parents.size()]), 
-							new WrappedStorageId<Long>(rootNode)
+							id(rootNode)
 						);
 				}
 			}
 		);
 	}
 	
-
 	@Override
-	public void writeCommit(StoredCommit commit) {
-		// TODO Auto-generated method stub
-		
+	public void writeCommit(final StoredCommit commit) {
+		sql.withStatement("INSERT INTO Commit (id, rootNodeId, message) values (?, ?, ?)", new StatementExecutor<Void>() {
+			@Override
+			public Void run(PreparedStatement stmt) throws SQLException {
+				stmt.setLong(1, id(commit.getId()));
+				stmt.setLong(2, id(commit.getRootNode()));
+				stmt.setNull(3, Types.VARCHAR);
+				stmt.executeUpdate();
+				
+				return null;
+			}
+		});
 	}
 
 	@Override
@@ -169,9 +232,9 @@ public class PgStorageBackend implements StorageBackend {
 		sql.withStatement("INSERT INTO Branch (id, name, commitId) VALUES (?, ?, ?)", new StatementExecutor<Void>() {
 			@Override
 			public Void run(PreparedStatement stmt) throws SQLException {
-				stmt.setLong(1, id(generateStorageId()).getWrappedId());
+				stmt.setLong(1, id(generateStorageId()));
 				stmt.setString(2, name);
-				stmt.setLong(3, id(commit.getId()).getWrappedId());
+				stmt.setLong(3, id(commit.getId()));
 				stmt.executeUpdate();
 				return null;
 			}
@@ -180,16 +243,11 @@ public class PgStorageBackend implements StorageBackend {
 
 	@Override
 	public StoredFlatNode readNode(final StorageId id) {
-		return sql.withStatement(
-				"SELECT "
-				+ "n.id, n.propertiesId, n.childrenId "
-				+ "FROM Node n"
-				+ "WHERE id = ?", 
-				
+		return sql.withStatement("SELECT n.id, n.propertiesId, n.childrenId FROM Node n WHERE id = ?", 
 			new StatementExecutor<StoredFlatNode>() {
 				@Override
 				public StoredFlatNode run(PreparedStatement stmt) throws SQLException {
-					stmt.setLong(1, id(id).getWrappedId());
+					stmt.setLong(1, id(id));
 					stmt.execute();
 					
 					try(ResultSet rs = stmt.getResultSet()) {
@@ -197,11 +255,7 @@ public class PgStorageBackend implements StorageBackend {
 							return null;
 						}
 						
-						return new StoredFlatNode(
-								new WrappedStorageId<Long>(rs.getLong("id")),
-								new WrappedStorageId<Long>(rs.getLong("childrenId")),
-								new WrappedStorageId<Long>(rs.getLong("propertiesId"))
-							);
+						return new StoredFlatNode(id(rs.getLong("id")), id(rs.getLong("childrenId")), id(rs.getLong("propertiesId")));
 					}
 				}
 			}
@@ -209,39 +263,123 @@ public class PgStorageBackend implements StorageBackend {
 	}
 
 	@Override
-	public StoredFlatNode writeNode(StoredFlatNode node) {
-		// TODO Auto-generated method stub
-		return null;
+	public StoredFlatNode writeNode(final StoredFlatNode node) {
+		return sql.withStatement("INSERT INTO Node (id, propertiesId, childrenId) VALUES (?, ?, ?)", 
+			new StatementExecutor<StoredFlatNode>() {
+				@Override
+				public StoredFlatNode run(PreparedStatement stmt) throws SQLException {
+					stmt.setLong(1, id(node.getStorageId()));
+					stmt.setLong(2, id(node.getProperties()));
+					stmt.setObject(3, id(node.getChildren()));
+					stmt.executeUpdate();
+					
+					return new StoredFlatNode(node);
+				}
+			}
+		);
 	}
 
 	@Override
-	public StorageId[] readChildren(StorageId childrenStorageId) {
-		// TODO Auto-generated method stub
-		return null;
+	public StorageId[] readChildren(final StorageId childrenStorageId) {
+		if (childrenStorageId == null) {
+			return null;
+		}
+		
+		return sql.withStatement("SELECT childId FROM NodeChildren WHERE id = ?", new StatementExecutor<StorageId[]>() {
+			@Override
+			public StorageId[] run(PreparedStatement stmt) throws SQLException {
+				stmt.setLong(1, id(childrenStorageId));
+				stmt.execute();
+				
+				try(ResultSet rs = stmt.getResultSet()) {
+					List<StorageId> childrenIds = new LinkedList<>();
+					while(rs.next()) {
+						childrenIds.add(id(rs.getLong("childId")));
+					}
+					return childrenIds.toArray(new StorageId[childrenIds.size()]);
+				}
+			}
+		});
 	}
 
 	@Override
-	public StorageId writeChildren(StorageId[] children) {
-		// TODO Auto-generated method stub
-		return null;
+	public StorageId writeChildren(final StorageId[] children) {
+		final StorageId id = generateStorageId();
+
+		return sql.withStatement("INSERT INTO NodeChildren (id, childId) VALUES (?, ?)", new StatementExecutor<StorageId>() {
+			@Override
+			public StorageId run(PreparedStatement stmt) throws SQLException {
+				for(StorageId child : children) {
+					stmt.setLong(1, id(id));
+					stmt.setLong(2, id(child));
+					stmt.addBatch();
+				}
+				stmt.executeBatch();
+				return id;
+			}
+		});
 	}
 
 	@Override
 	public StorageId writeProperties(Map<String, Property> properties) {
-		// TODO Auto-generated method stub
-		return null;
+		final JSONObject json = new JSONObject();
+		final StorageId id = generateStorageId();
+		
+		try {
+			for(Entry<String, Property> entry : properties.entrySet()) {
+				json.put(entry.getKey(), entry.getValue().getObjectValue());
+			}
+		} catch (JSONException e) {
+			throw new RuntimeException("Error when converting properties to json object", e);
+		}
+		
+		return sql.withStatement("INSERT INTO Properties (id, properties) VALUES (?, ?)", new StatementExecutor<StorageId>() {
+			@Override
+			public StorageId run(PreparedStatement stmt) throws SQLException {
+				PGobject jsonObject = new PGobject();
+				jsonObject.setType("json");
+				jsonObject.setValue(json.toString());
+				
+				stmt.setLong(1, id(id));
+				stmt.setObject(2, jsonObject);
+				stmt.executeUpdate();
+				return id;
+			}
+		});
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	@Nonnull
-	public Map<String, Property> readProperties(StorageId propertiesStorageId) {
-		// TODO Auto-generated method stub
-		return new HashMap<>();
+	public Map<String, Property> readProperties(final StorageId propertiesStorageId) {
+		return sql.withStatement("SELECT properties FROM Properties WHERE id = ?", new StatementExecutor<Map<String, Property>>() {
+			@Override @Nonnull
+			public Map<String, Property> run(PreparedStatement stmt) throws SQLException {
+				stmt.setLong(1, id(propertiesStorageId));
+				stmt.execute();
+				try(ResultSet rs = stmt.getResultSet()) {
+					HashMap<String, Property> result = new HashMap<>();
+					if(!rs.next()) {
+						return result;
+					}
+					try {
+						JSONObject json = new JSONObject(rs.getString("properties"));
+						for(String name : JSONObject.getNames(json)) {
+							result.put(name, new Property(json.get(name)));
+						}
+					} catch (JSONException e) {
+						throw new RuntimeException("Error while reading properies", e);
+					}
+					
+					return result;
+				}
+			}
+		});
 	}
 
 	@Override
 	public <T extends StorageAdapter> T getAdapter(Class<T> adapterInterface) {
-		// TODO Auto-generated method stub
+		// No support for any adapter right now
 		return null;
 	}
 

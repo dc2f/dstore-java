@@ -37,6 +37,7 @@ dependencies {
     // TestNG is also supported by the Gradle Test task. Just change the
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
-    testCompile "junit:junit:4.11"
-    testCompile "org.easymock:easymock:3.1"
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.easymock:easymock:3.1'
+    testRuntime 'ch.qos.logback:logback-classic:1.0.13'
 }

@@ -19,12 +19,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
+import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
 import com.dc2f.dstore.storage.StoredFlatNode;
+import com.dc2f.dstore.storage.flatjsonfiles.SlowChildQueryAdapter;
 import com.dc2f.dstore.storage.simple.WrappedStorageId;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -54,6 +56,11 @@ public class PgStorageBackend implements StorageBackend {
 	private Long storageId;
 	
 	/**
+	 * The storage adapters implemented by this backend.
+	 */
+	private Map<Class<?>, StorageAdapter> adapters = new HashMap<>();
+	
+	/**
 	 * Creates a new postgresql storage backend with the given postgresql configuration.
 	 * 
 	 * @param host The host to connect.
@@ -74,6 +81,8 @@ public class PgStorageBackend implements StorageBackend {
 		} catch (PropertyVetoException e) {
 			throw new RuntimeException("Error initializing the datasource", e);
 		}
+		
+		adapters.put(ChildQueryAdapter.class, new SlowChildQueryAdapter(this));
 	}
 	
 	/**
@@ -429,10 +438,9 @@ public class PgStorageBackend implements StorageBackend {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends StorageAdapter> T getAdapter(Class<T> adapterInterface) {
-		// No support for any adapter right now
-		return null;
+		return (T) adapters.get(adapterInterface);
 	}
-
 }

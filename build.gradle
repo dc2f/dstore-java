@@ -41,3 +41,20 @@ dependencies {
     testCompile 'org.easymock:easymock:3.1'
     testRuntime 'ch.qos.logback:logback-classic:1.0.13'
 }
+
+// I'm pretty sure this is not the nicest way to do this..
+// (We are simply trying to pass a system property, if it was set, into our tests.)
+def setTestPropertyIfExists(task, name) {
+    if (System.getProperty(name) != null) {
+        tasks.withType(Test) {
+            systemProperty name, System.getProperty(name);
+        }
+    }
+}
+
+setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pghost');
+setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pgport');
+setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pguser');
+setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pgpassword');
+setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pgdatabase');
+

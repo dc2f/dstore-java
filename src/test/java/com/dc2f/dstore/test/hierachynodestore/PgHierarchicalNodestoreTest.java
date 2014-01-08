@@ -7,7 +7,12 @@ public class PgHierarchicalNodestoreTest extends AbstractHierarchicalNodeStoreTe
 	
 	@Override
 	protected StorageBackend initStorageBackend() {
-		PgStorageBackend storage = new PgStorageBackend("localhost", 5432, "dstore-test", "dstore-test", "test");
+		String host = System.getProperty("com.dc2f.dstore.test.pghost", "localhost");
+		int port = Integer.parseInt(System.getProperty("com.dc2f.dstore.test.port", "5432"));
+		String user = System.getProperty("com.dc2f.dstore.test.pguser", "dstore-test");
+		String database = System.getProperty("com.dc2f.dstore.test.pgdatabase", "dstore-test");
+		String password = System.getProperty("com.dc2f.dstore.test.pgpassword", "test");
+		PgStorageBackend storage = new PgStorageBackend(host, port, user, database, password);
 		storage.dropSchema();
 		storage.createSchema();
 		return storage;

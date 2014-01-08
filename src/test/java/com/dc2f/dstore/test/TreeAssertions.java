@@ -38,12 +38,12 @@ public class TreeAssertions {
 	 * @return The asserted tree including all ids.
 	 */
 	public static ExpectedNode assertTree(String message, ExpectedNode expected, WorkingTreeNode node) {
-		message = message == null ? "" : message + "; ";
+		String messagePrefix = message == null ? "" : (message + "; ");
 		
 		assertNotNull("Given WorkingTreeNode must not be null.", node);
 		
 		// check the properties
-		assertEquals(message + "Expected properties count equals actual properties count.", 
+		assertEquals(messagePrefix + "Expected properties count equals actual properties count for node " + node.getStorageId(), 
 				(long) (expected.properties.length / 2), node.getProperties().size());
 		
 		for(int i=0; i < expected.properties.length; i+=2) {
@@ -52,11 +52,11 @@ public class TreeAssertions {
 			
 			Property actual = node.getProperty(key);
 			assertNotNull(actual);
-			assertEquals(expectedValue, actual.getObjectValue());
+			assertEquals(messagePrefix + "check value of property " + key + " for node " + node.getStorageId(), expectedValue, actual.getObjectValue());
 		}
 		
 		// check children
-		assertEquals(message + "Expected children count equals actual children count",
+		assertEquals(messagePrefix + "Expected children count equals actual children count for node " + node.getStorageId(),
 				expected.children.size(), node.getChildrenCount());
 
 		Iterator<ExpectedNode> expectedChildren = expected.children.iterator();

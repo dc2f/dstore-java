@@ -1,9 +1,14 @@
 package com.dc2f.dstore.test.hierachynodestore;
 
+import org.junit.Ignore;
+
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.storage.pgsql.PgStorageBackend;
 
+@Ignore
 public class PgHierarchicalNodestoreTest extends AbstractHierarchicalNodeStoreTest {
+	
+	
 	
 	@Override
 	protected StorageBackend initStorageBackend() {

@@ -2,6 +2,8 @@ package com.dc2f.dstore.hierachynodestore;
 
 import java.util.Collections;
 
+import javax.annotation.Nonnull;
+
 import com.dc2f.dstore.hierachynodestore.impl.WorkingTreeImpl;
 import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
@@ -15,9 +17,9 @@ import com.dc2f.dstore.storage.StoredFlatNode;
 public class HierarchicalNodeStore {
 	private StorageBackend storageBackend;
 	
-	private final static String ROOT_COMMIT_ID = "rootCommitId";
-	private final static String ROOT_NODE_NAME = "";
-	private final static String MASTER_BRANCH_NAME = "master";
+	private final static @Nonnull String ROOT_COMMIT_ID = "rootCommitId";
+	private final static @Nonnull String ROOT_NODE_NAME = "";
+	private final static @Nonnull String MASTER_BRANCH_NAME = "master";
 
 
 	public HierarchicalNodeStore(StorageBackend storageBackend) {

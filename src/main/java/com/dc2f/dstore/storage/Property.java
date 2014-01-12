@@ -10,7 +10,8 @@ public class Property {
 	public static enum PropertyType {
 		LONG(Long.class),
 		DOUBLE(Double.class),
-		STRING(String.class) ;
+		STRING(String.class),
+		BOOLEAN(Boolean.class);
 		
 		
 		private Class<?> valueClass;
@@ -25,10 +26,11 @@ public class Property {
 	}
 	
 	private PropertyType type;
-	private Object objValue;
+	private @Nonnull Object objValue;
 	
-	public Property(Object value) throws IllegalStateException {
+	public Property(@Nonnull Object value) throws IllegalStateException {
 		setObjValue(value);
+		objValue = value;
 	}
 	
 	public PropertyType getPropertyType() {
@@ -37,7 +39,6 @@ public class Property {
 	
 	private void assertType(PropertyType expectedType) {
 		if (this.type != expectedType
-				|| objValue == null
 				|| !expectedType.getValueClass().isAssignableFrom(objValue.getClass())) {
 			throw new IllegalStateException("Requested {" + expectedType
 					+ "} but has {" + this.type + "} - of type: {" + objValue.getClass() + "}");
@@ -53,7 +54,7 @@ public class Property {
 //		setObjValue(value);
 //	}
 	
-	private void setObjValue(Object value) {
+	private void setObjValue(@Nonnull Object value) {
 		for (PropertyType type : PropertyType.values()) {
 			if (type.getValueClass().isAssignableFrom(value.getClass())) {
 				this.type = type;
@@ -69,9 +70,14 @@ public class Property {
 		return (Double) objValue;
 	}
 	
-	public String getString() {
+	public @Nonnull String getString() {
 		assertType(PropertyType.STRING);
 		return (String) objValue;
+	}
+	
+	public boolean getBoolean() {
+		assertType(PropertyType.BOOLEAN);
+		return ((Boolean) objValue).booleanValue();
 	}
 	
 //	public void setString(String value) {

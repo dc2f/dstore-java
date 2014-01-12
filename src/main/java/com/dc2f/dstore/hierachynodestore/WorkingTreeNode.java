@@ -16,7 +16,10 @@ public interface WorkingTreeNode {
 	 * @return the created child for this node
 	 */
 	@Nonnull
-	WorkingTreeNode addChild(String childName);
+	WorkingTreeNode addChild(@Nonnull String childName);
+	
+	@Nonnull
+	WorkingTreeNode addChild();
 	
 	
 	@Nonnull
@@ -24,14 +27,14 @@ public interface WorkingTreeNode {
 	int getChildrenCount();
 
 	@Nullable
-	Property getProperty(String name);
+	Property getProperty(@Nonnull String name);
 	
 	void setProperty(@Nonnull String name, @Nonnull Property value);
 	
 	@Nonnull
 	Map<String, Property> getProperties();	
 	
-	Iterable<WorkingTreeNode> getChildrenByProperty(String propertyName, Object value);
+	Iterable<WorkingTreeNode> getChildrenByProperty(@Nonnull String propertyName, Object value);
 
 	/**
 	 * @return the storage id of the node. might return null, if it was not yet committed.

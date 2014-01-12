@@ -7,10 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.dc2f.dstore.hierachynodestore.Commit;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
+import com.dc2f.dstore.hierachynodestore.impl.nodetype.NodeTypeAccessorImpl;
+import com.dc2f.dstore.hierachynodestore.nodetype.NodeTypeAccessor;
 import com.dc2f.dstore.storage.MutableStoredFlatNode;
 import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
@@ -20,14 +25,19 @@ import com.dc2f.dstore.storage.StoredFlatNode;
 
 public class WorkingTreeImpl implements WorkingTree {
 
-	private HierarchicalNodeStore hierarchicalNodeStore;
+	/**
+	 * Reference back to the hierarchical node store in case we need it(?)
+	 */
+	@SuppressWarnings("unused")
+	private @Nonnull HierarchicalNodeStore hierarchicalNodeStore;
 	private StoredCommit headCommit;
 	private String branchName;
+	private @Nullable NodeTypeAccessor nodeTypeAccessor;
 	StorageBackend storageBackend;
 	Map<StorageId, WorkingTreeNodeImpl> loadedNodes = new HashMap<>();
 	private List<WorkingTreeNodeImpl> changedNodes = new ArrayList<>();
 
-	public WorkingTreeImpl(HierarchicalNodeStore hierarchicalNodeStore,
+	public WorkingTreeImpl(@Nonnull HierarchicalNodeStore hierarchicalNodeStore,
 			StorageBackend storageBackend, StoredCommit headCommit, String branchName) {
 		this.hierarchicalNodeStore = hierarchicalNodeStore;
 		this.storageBackend = storageBackend;
@@ -36,13 +46,13 @@ public class WorkingTreeImpl implements WorkingTree {
 	}
 
 	@Override
-	public WorkingTreeNode getRootNode() {
+	public @Nonnull WorkingTreeNode getRootNode() {
 		StorageId rootNodeId = headCommit.getRootNode();
 		return getNodeByStorageId(rootNodeId, null);
 //		return new WorkingTreeNodeImpl(this, storageBackend.readNode(rootNodeId));
 	}
 	
-	public WorkingTreeNode getNodeByStorageId(StorageId nodeStorageId, WorkingTreeNodeImpl parentNode) {
+	public @Nonnull WorkingTreeNode getNodeByStorageId(StorageId nodeStorageId, WorkingTreeNodeImpl parentNode) {
 		// TODO shouldn't we add caching right here?
 		WorkingTreeNodeImpl ret = loadedNodes.get(nodeStorageId);
 		if (ret == null) {
@@ -61,7 +71,7 @@ public class WorkingTreeImpl implements WorkingTree {
 	}
 
 	@Override
-	public Commit commit(String message) {
+	public @Nonnull Commit commit(String message) {
 		if (message == null) {
 			message = "";
 		}
@@ -189,6 +199,16 @@ public class WorkingTreeImpl implements WorkingTree {
 			}
 		}
 		return toUpdate;
+	}
+
+	@Override
+	@Nonnull
+	public NodeTypeAccessor getNodeTypeAccessor() {
+		NodeTypeAccessor ret = nodeTypeAccessor;
+		if (ret == null) {
+			nodeTypeAccessor = ret = new NodeTypeAccessorImpl(this);
+		}
+		return ret;
 	}
 
 

@@ -58,7 +58,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	}
 	
 	@Override
-	public Iterable<WorkingTreeNode> getChildrenByProperty(String propertyName, Object value) {
+	public Iterable<WorkingTreeNode> getChildrenByProperty(@Nonnull String propertyName, Object value) {
 		ChildQueryAdapter queryAdapter = workingTreeImpl.storageBackend.getAdapter(ChildQueryAdapter.class);
 		
 		StorageId storageId = this.getStorageId();
@@ -124,9 +124,17 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 //	}
 	
 	@Override @Nonnull
-	public WorkingTreeNode addChild(String childName) {
-		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, null, this);
+	public WorkingTreeNode addChild(@Nonnull String childName) {
+		WorkingTreeNode child = addChild();
 		child.setProperty(Property.PROPERTY_NAME, new Property(childName));
+
+		return child;
+	}
+	
+	@Override
+	@Nonnull
+	public WorkingTreeNode addChild() {
+		WorkingTreeNodeImpl child = new WorkingTreeNodeImpl(workingTreeImpl, null, this);
 		child.isNew = true;
 		workingTreeImpl.loadedNodes.put(child.getStorageId(), child);
 		if (createdChildren == null) {
@@ -228,7 +236,7 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 	}
 	
 	@Nullable
-	public Property getProperty(String propertyName) {
+	public Property getProperty(@Nonnull String propertyName) {
 		return loadProperties().get(propertyName);
 //		Map<String, Property> properties = workingTreeImpl.storageBackend.readProperties(storedNode.getProperties());
 //		return properties.get(propertyName);

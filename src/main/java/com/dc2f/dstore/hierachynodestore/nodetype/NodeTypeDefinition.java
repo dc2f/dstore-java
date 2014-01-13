@@ -11,6 +11,11 @@ import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
  * TODO: maybe we should also extend {@link WorkingTreeNode}?
  */
 public interface NodeTypeDefinition {
+	/**
+	 * the 'nodetype' name for node type definition
+	 */
+	public static final @Nonnull String NODETYPE_NAME_NODETYPEDEFINTION = "com.dc2f.nodetype.NodeTypeDefinition";
+	public static final @Nonnull String NODETYPE_NAME_PROPERTYDEFINITION = "com.dc2f.nodetype.PropertyDefinition";
 	
 	@Nonnull Collection<PropertyDefinition> listPropertyDefinitions();
 	/**

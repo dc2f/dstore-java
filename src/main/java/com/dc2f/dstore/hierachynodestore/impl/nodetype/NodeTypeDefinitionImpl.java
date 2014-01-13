@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.hierachynodestore.nodetype.NodeTypeDefinition;
 import com.dc2f.dstore.hierachynodestore.nodetype.PropertyDefinition;
@@ -39,6 +40,7 @@ public class NodeTypeDefinitionImpl implements NodeTypeDefinition {
 	public PropertyDefinition addPropertyDefinition(@Nonnull String name) {
 		WorkingTreeNode propertyNode = node.addChild();
 		propertyNode.setProperty(PROPERTY_NAME, new Property(name));
+		propertyNode.setProperty(WorkingTree.NAME_NODETYPE, new Property(NodeTypeDefinition.NODETYPE_NAME_PROPERTYDEFINITION));
 		return new PropertyDefinitionImpl(propertyNode);
 	}
 

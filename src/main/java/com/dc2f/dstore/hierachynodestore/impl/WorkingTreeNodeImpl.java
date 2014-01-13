@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
+import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageId;
@@ -122,6 +123,12 @@ public class WorkingTreeNodeImpl implements WorkingTreeNode {
 //		}
 //		return ret;
 //	}
+	
+	@Override
+	public Iterable<WorkingTreeNode> getChildrenByNodeType(
+			@Nonnull String nodeTypeName) {
+		return getChildrenByProperty(WorkingTree.NAME_NODETYPE, nodeTypeName);
+	}
 	
 	@Override @Nonnull
 	public WorkingTreeNode addChild(@Nonnull String childName) {

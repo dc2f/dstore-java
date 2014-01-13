@@ -8,10 +8,10 @@ public class Property {
 	 */
 	@Nonnull public static final String PROPERTY_NAME = "name";
 	public static enum PropertyType {
-		LONG(Long.class),
-		DOUBLE(Double.class),
-		STRING(String.class),
-		BOOLEAN(Boolean.class);
+		@Nonnull LONG(Long.class),
+		@Nonnull DOUBLE(Double.class),
+		@Nonnull STRING(String.class),
+		@Nonnull BOOLEAN(Boolean.class);
 		
 		
 		private Class<?> valueClass;

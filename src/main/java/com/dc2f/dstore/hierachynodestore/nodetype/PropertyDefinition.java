@@ -9,11 +9,13 @@ import com.dc2f.dstore.storage.Property.PropertyType;
  */
 public interface PropertyDefinition {
 	@Nonnull String getName();
+	
+	@Nonnull PropertyDefinition setType(@Nonnull PropertyType type);
 	@Nonnull PropertyType getType();
 	
-	void setRequired(boolean isRequired);
+	@Nonnull PropertyDefinition setRequired(boolean isRequired);
 	boolean isRequired();
 	
-	void setIndexed(boolean isIndexed);
+	@Nonnull PropertyDefinition setIndexed(boolean isIndexed);
 	boolean isIndexed();
 }

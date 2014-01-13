@@ -28,6 +28,12 @@ public class PropertyDefinitionImpl implements PropertyDefinition {
 		// a property definition must always have a name..
 		return assertNotNull(node.getProperty(PROPERTY_NAME)).getString();
 	}
+	
+	@Override
+	public @Nonnull PropertyDefinition setType(@Nonnull PropertyType type) {
+		node.setProperty(PROPERTY_TYPE, new Property(assertNotNull(type.name())));
+		return this;
+	}
 
 	@Override
 	@Nonnull
@@ -42,8 +48,9 @@ public class PropertyDefinitionImpl implements PropertyDefinition {
 	}
 
 	@Override
-	public void setRequired(boolean isRequired) {
+	public @Nonnull PropertyDefinition setRequired(boolean isRequired) {
 		node.setProperty(PROPERTY_REQUIRED, new Property(new Boolean(isRequired)));
+		return this;
 	}
 
 	@Override
@@ -56,8 +63,9 @@ public class PropertyDefinitionImpl implements PropertyDefinition {
 	}
 
 	@Override
-	public void setIndexed(boolean isIndexed) {
+	public @Nonnull PropertyDefinition setIndexed(boolean isIndexed) {
 		node.setProperty(PROPERTY_INDEXED, new Property(new Boolean(isIndexed)));
+		return this;
 	}
 
 	@Override

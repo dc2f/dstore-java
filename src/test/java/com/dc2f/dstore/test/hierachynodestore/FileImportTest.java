@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.dc2f.dstore.folderimport.FolderImporter;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
-import com.dc2f.dstore.hierachynodestore.WorkingTreeUtils;
 import com.dc2f.dstore.storage.map.HashMapStorage;
 import com.dc2f.dstore.test.TreeAssertions.ExpectedNode;
 
@@ -22,10 +21,6 @@ public class FileImportTest {
 	
 	/**
 	 * Tests the basic import of files.
-	 * 
-	 * FIXME: Make the test running stable
-	 * The FolderImporter doesn't provide a stable import order of children on the same level.
-	 * This means that we need to make the assertTree function more flexible and not rely on the provided order of nodes.
 	 */
 	@Test
 	public void testBasicImport() {
@@ -34,7 +29,6 @@ public class FileImportTest {
 		importer.startImport(new File("./test-data/fileimport"));
 		
 		WorkingTreeNode rootNode = nodeStore.checkoutBranch("master").getRootNode();
-		System.out.println(WorkingTreeUtils.debugRecursiveTree(rootNode));
 		
 		ExpectedNode expected = 
 			node(properties("name", ""),

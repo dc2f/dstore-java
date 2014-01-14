@@ -142,12 +142,51 @@ public class TreeAssertionsTest {
 		assertTree(expected, node);
 	}
 
+	/**
+	 * Tests a working tree assertion where the children order is not in the same in the expected node.
+	 * The assertion must still pass because order of children in WorkingTreeNode is not guaranteed to be stable.
+	 */
+	@Test
+	public void testChildrenOrder() {
+		WorkingTreeMockHelper helper = new WorkingTreeMockHelper();
+		ExpectedNode expected = node(properties("name", ""), 
+			node(properties("name", "B")), // Note: B before A
+			node(properties("name", "A")) 
+		);
+		WorkingTreeNode childA = getChild(helper, "A");
+		WorkingTreeNode childB = getChild(helper, "B");
+		WorkingTreeNode root = getChild(helper, "", childA, childB); // Note: A before B
+		assertTree(expected, root);
+	}
+	
+	/**
+	 * Tests a more complex nested case of children order mismatch with same name siblings.
+	 */
+	@Test
+	public void testChildrenOrderSns() {
+		WorkingTreeMockHelper helper = new WorkingTreeMockHelper();
+		
+		ExpectedNode expected = node(properties("name", ""),
+			// A->B before A->C
+			node(properties("name", "A"),
+				node(properties("name", "B"))),
+			node(properties("name", "A"),
+				node(properties("name", "C")))
+		);
+		
+		WorkingTreeNode c = getChild(helper, "C");
+		WorkingTreeNode b = getChild(helper, "B");
+		WorkingTreeNode ac = getChild(helper, "A", c);
+		WorkingTreeNode ab = getChild(helper, "A", b);
+		WorkingTreeNode root = getChild(helper, "", ac, ab); // A->C before A->B
+		
+		assertTree(expected, root);
+	}
+
 	private WorkingTreeNode getChild(WorkingTreeMockHelper helper, String name, WorkingTreeNode ... children) {
 		HashMap<String, Property> properties = new HashMap<>();
 		properties.put("name", new Property(name));
 		WorkingTreeNode child = helper.getWorkingTreeNode(properties, Arrays.asList(children));
 		return child;
 	}
-
-
 }

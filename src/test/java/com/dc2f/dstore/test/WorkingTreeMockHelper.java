@@ -30,14 +30,14 @@ public class WorkingTreeMockHelper {
 			final Map<String, Property> properties, final Collection<WorkingTreeNode> children) {
 		StorageId id = getNextId();
 		WorkingTreeNode node = EasyMock.createMock(WorkingTreeNode.class);
-		EasyMock.expect(node.getProperties()).andReturn(properties);
+		EasyMock.expect(node.getProperties()).andReturn(properties).anyTimes();
 		EasyMock.expect(node.getProperty(EasyMock.anyObject(String.class))).andAnswer(new IAnswer<Property>() {
 			@Override
 			public Property answer() throws Throwable {
 				return properties.get(EasyMock.getCurrentArguments()[0]);
 			}
-		});
-		EasyMock.expect(node.getChildren()).andReturn(children);
+		}).anyTimes();
+		EasyMock.expect(node.getChildren()).andReturn(children).anyTimes();
 		EasyMock.expect(node.getChildrenCount()).andReturn(children.size()).anyTimes();
 		EasyMock.expect(node.getStorageId()).andReturn(id).anyTimes();
 		EasyMock.replay(node);

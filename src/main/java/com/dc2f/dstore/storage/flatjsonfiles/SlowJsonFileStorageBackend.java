@@ -270,11 +270,16 @@ public class SlowJsonFileStorageBackend implements StorageBackend {
 
 	private JSONObject readFile(StorageId storageId, String type) {
 		try {
-			String content = Files.toString(getFileForStorageId(storageId, type), Charsets.UTF_8);
+			File file = getFileForStorageId(storageId, type);
+			if(!file.exists()) {
+				return null;
+			}
+			
+			String content = Files.toString(file, Charsets.UTF_8);
 			return new JSONObject(content);
 		} catch (IOException | JSONException e) {
 			logger.error("Error while reading json file.", e);
-			return null;
+			throw new RuntimeException("Error while reading json file.", e);
 		}
 	}
 

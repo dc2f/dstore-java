@@ -1,104 +1,63 @@
 package com.dc2f.dstore.test.hierachynodestore;
 
-import static com.dc2f.dstore.test.TreeAssertions.assertTree;
-import static com.dc2f.dstore.test.TreeAssertions.node;
-import static com.dc2f.dstore.test.TreeAssertions.properties;
-import static org.junit.Assert.assertSame;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import java.io.IOException;
-
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
-import com.dc2f.dstore.hierachynodestore.WorkingTree;
-import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
 import com.dc2f.dstore.storage.StorageBackend;
-import com.dc2f.dstore.test.TreeAssertions.ExpectedNode;
+import com.dc2f.dstore.test.storage.TestStorageBackends;
+import com.dc2f.dstore.test.storage.TestStorageProvider;
 
+/**
+ * Base class for tests that need a single HierarchicalNodeStore to run.
+ * 
+ * To access the node store use {@link #getNodeStore()}.
+ * The store is initialized before every test and destroyed after the test.
+ */
+@RunWith(Parameterized.class)
 public abstract class AbstractHierarchicalNodeStoreTest {
 
 	private HierarchicalNodeStore nodeStore;
+	private StorageBackend backend;
+	private TestStorageProvider<StorageBackend> backendFactory;
+	
+	public AbstractHierarchicalNodeStoreTest(TestStorageProvider<StorageBackend> backendFactory, String storageFactoryName) {
+		this.backendFactory = backendFactory;
+	}
+	
+	/**
+	 * Get the node store for this test.
+	 * @return The node store for this test.
+	 */
+	public synchronized HierarchicalNodeStore getNodeStore() {
+		return nodeStore;
+	}
 	
 	@Before
-	public void setupDstore() throws IOException {
-		StorageBackend storageBackend = initStorageBackend();
-		nodeStore = new HierarchicalNodeStore(storageBackend);
-	}
-
-	protected abstract StorageBackend initStorageBackend();
-	
-	@Test
-	public void testInitFreshBranch() {
-		WorkingTree wt1 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root1 = wt1.getRootNode();
-		ExpectedNode onlyRoot = node(properties("name", ""));
-		assertTree("wt1 must only see the root node", onlyRoot, root1);
+	public void setupNodeStore() {
+		backend = backendFactory.createStorageBackend();
+		nodeStore = new HierarchicalNodeStore(backend);
 	}
 	
-	@Test
-	public void testAddingChilden() {
-		WorkingTree wt1 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root1 = wt1.getRootNode();
-		WorkingTreeNode a = root1.addChild("A");
-		WorkingTreeNode b = root1.addChild("B");
-		
-		ExpectedNode expectedAB = node(properties("name", ""),
-				node(properties("name", "A")),
-				node(properties("name", "B"))
-			);
-		
-		assertTree("Changes are visible inside uncommited working tree wt1", expectedAB, root1);
-		assertSame("Get rootNode() must always return the same root node", root1, wt1.getRootNode());
+	@After
+	public void destroyNodeStore() {
+		backendFactory.destroyStorageBackend(backend);
 	}
 	
-	@Test
-	public void testTwoIndependentCheckouts() {
-		WorkingTree wt1 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root1 = wt1.getRootNode();
-		WorkingTreeNode a = root1.addChild("A");
-		WorkingTreeNode b = root1.addChild("B");
-		
-		WorkingTree wt2 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root2 = wt2.getRootNode();
-		ExpectedNode onlyRoot = node(properties("name", ""));
-		assertTree("Changes are not visible in wt2 which was checked out before commiting wt1", onlyRoot, root2);
-	}
-	
-	@Test
-	public void testCommitNotAffectingWorkInProgress() {
-		WorkingTree wt1 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root1 = wt1.getRootNode();
-		WorkingTreeNode a = root1.addChild("A");
-		WorkingTreeNode b = root1.addChild("B");
-		
-		WorkingTree wt2 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root2 = wt2.getRootNode();
-		ExpectedNode onlyRoot = node(properties("name", ""));
-
-		wt1.commit("Commiting wt1, nothing must have changed in already existing working trees");
-		ExpectedNode expectedAB = node(properties("name", ""),
-				node(properties("name", "A")),
-				node(properties("name", "B"))
-			);
-		assertTree("root1 data didn't change during commit", expectedAB, root1);
-		assertSame("Get rootNode() must return the same root node as before commiting", root1, wt1.getRootNode());
-	}
-	
-	@Test
-	public void testVisibilityAfterCommit() {
-		WorkingTree wt1 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root1 = wt1.getRootNode();
-		WorkingTreeNode a = root1.addChild("A");
-		WorkingTreeNode b = root1.addChild("B");
-		wt1.commit("Commiting wt1, nothing must have changed in already existing working trees");
-		
-		WorkingTree wt3 = nodeStore.checkoutBranch("master");
-		WorkingTreeNode root3 = wt3.getRootNode();
-		ExpectedNode expectedAB = node(properties("name", ""),
-				node(properties("name", "A")),
-				node(properties("name", "B"))
-			);
-		assertTree("wt3 must see changes commited by wt1", expectedAB, root3);
+	@Parameters(name="{1}")
+	public static Collection<Object[]> getStorageBackendFactories() {
+		List<TestStorageProvider<?>> backendFactories = TestStorageBackends.getConfiguredFactories();
+		List<Object []> parameters = new ArrayList<>(backendFactories.size());
+		for(TestStorageProvider<?> factory : backendFactories) {
+			parameters.add(new Object [] { factory, factory.getClass().getName() });
+		}
+		return parameters;
 	}
 }

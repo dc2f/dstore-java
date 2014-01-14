@@ -11,21 +11,27 @@ import org.junit.Test;
 import com.dc2f.dstore.folderimport.FolderImporter;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
-import com.dc2f.dstore.storage.map.HashMapStorage;
+import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.test.TreeAssertions.ExpectedNode;
+import com.dc2f.dstore.test.storage.TestStorageProvider;
 
 /**
  * Test for testing the file importer.
  */
-public class FileImportTest {
+public class FileImportTest extends AbstractHierarchicalNodeStoreTest {
 	
+	public FileImportTest(TestStorageProvider<StorageBackend> backendFactory, String storageFactoryName) {
+		super(backendFactory, storageFactoryName);
+	}
+
 	/**
 	 * Tests the basic import of files.
 	 */
 	@Test
 	public void testBasicImport() {
-		HierarchicalNodeStore nodeStore = new HierarchicalNodeStore(new HashMapStorage());
+		HierarchicalNodeStore nodeStore = getNodeStore();
 		FolderImporter importer = new FolderImporter(nodeStore);
+		// TODO: doubt that this will run stable -> how should we solve this?
 		importer.startImport(new File("./test-data/fileimport"));
 		
 		WorkingTreeNode rootNode = nodeStore.checkoutBranch("master").getRootNode();

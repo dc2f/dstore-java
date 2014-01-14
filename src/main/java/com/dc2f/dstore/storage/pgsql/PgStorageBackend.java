@@ -1,6 +1,7 @@
 package com.dc2f.dstore.storage.pgsql;
 
 import java.beans.PropertyVetoException;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
@@ -33,7 +34,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 /**
  * Storage backend storing in a postgresql database.
  */
-public class PgStorageBackend implements StorageBackend {
+public class PgStorageBackend implements StorageBackend, Closeable {
 
 	/**
 	 * Datasource to obtain database connections.
@@ -70,7 +71,7 @@ public class PgStorageBackend implements StorageBackend {
 	 */
 	public PgStorageBackend(String host, int port, String database, String username, String password) {
 		try {
-			this.datasource = new ComboPooledDataSource();
+			datasource = new ComboPooledDataSource();
 			datasource.setDriverClass("org.postgresql.Driver");
 			datasource.setJdbcUrl("jdbc:postgresql://" + host + ":" + port + "/" + database);
 			datasource.setUser(username);
@@ -83,6 +84,14 @@ public class PgStorageBackend implements StorageBackend {
 		}
 		
 		adapters.put(ChildQueryAdapter.class, new SlowChildQueryAdapter(this));
+	}
+	
+	/**
+	 * Correctly closes the connection to the database.
+	 */
+	@Override
+	public void close() throws IOException {
+		datasource.close();
 	}
 	
 	/**

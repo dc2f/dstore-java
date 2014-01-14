@@ -53,7 +53,7 @@ public abstract class AbstractHierarchicalNodeStoreTest {
 	
 	@Parameters(name="{1}")
 	public static Collection<Object[]> getStorageBackendFactories() {
-		List<TestStorageProvider<?>> backendFactories = TestStorageBackends.getConfiguredFactories();
+		List<TestStorageProvider<?>> backendFactories = TestStorageBackends.getConfiguredProviders();
 		List<Object []> parameters = new ArrayList<>(backendFactories.size());
 		for(TestStorageProvider<?> factory : backendFactories) {
 			parameters.add(new Object [] { factory, factory.getClass().getName() });

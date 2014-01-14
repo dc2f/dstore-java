@@ -22,7 +22,7 @@ public class PgTestStorageProvider implements TestStorageProvider<PgStorageBacke
 	private Map<PgStorageBackend, String> databases = new HashMap<>();
 	
 	private String host = System.getProperty("com.dc2f.dstore.test.pghost", "localhost");
-	private int port = Integer.parseInt(System.getProperty("com.dc2f.dstore.test.port", "5432"));
+	private int port = Integer.parseInt(System.getProperty("com.dc2f.dstore.test.pgport", "5432"));
 	private String user = System.getProperty("com.dc2f.dstore.test.pguser", "dstore-test");
 	private String password = System.getProperty("com.dc2f.dstore.test.pgpassword", "test");
 

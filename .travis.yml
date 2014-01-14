@@ -4,4 +4,6 @@ services:
 addons:
   postgresql: 9.3
 before_script:
-  - psql -c "create user \"dstore-test\" with createdb encrypted password 'test';" -U postgres
+  - psql -c "CREATE USER \"dstore-test\" WITH CREATEDB ENCRYPTED PASSWORD 'test';" -U postgres
+script:
+  - ./gradlew check -Dcom.dc2f.dstore.test.storageProviders=com.dc2f.dstore.test.storage.HashMapTestStorageProvider,com.dc2f.dstore.test.storage.SlowJsonTestStorageProvider,com.dc2f.dstore.test.storage.PgTestStorageProvider

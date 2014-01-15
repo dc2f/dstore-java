@@ -16,7 +16,10 @@ public interface WorkingTreeNode {
 	 * @return the created child for this node
 	 */
 	@Nonnull
-	WorkingTreeNode addChild(String childName);
+	WorkingTreeNode addChild(@Nonnull String childName);
+	
+	@Nonnull
+	WorkingTreeNode addChild();
 	
 	
 	@Nonnull
@@ -24,14 +27,21 @@ public interface WorkingTreeNode {
 	int getChildrenCount();
 
 	@Nullable
-	Property getProperty(String name);
+	Property getProperty(@Nonnull String name);
 	
 	void setProperty(@Nonnull String name, @Nonnull Property value);
 	
 	@Nonnull
 	Map<String, Property> getProperties();	
 	
-	Iterable<WorkingTreeNode> getChildrenByProperty(String propertyName, Object value);
+	Iterable<WorkingTreeNode> getChildrenByProperty(@Nonnull String propertyName, Object value);
+	
+	/**
+	 * TODO: does it make sense to pass in a String here, instead of a NodeTypeDefinition object?
+	 * @param nodeType fully qualified node type name
+	 * @return all direct children with the given node type.
+	 */
+	Iterable<WorkingTreeNode> getChildrenByNodeType(@Nonnull String nodeTypeName);
 
 	/**
 	 * @return the storage id of the node. might return null, if it was not yet committed.

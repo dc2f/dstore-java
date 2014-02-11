@@ -12,6 +12,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'sonar-runner'
 apply plugin: 'jacoco'
+apply plugin: 'maven'
 
 version = '0.0.1'
 group = 'com.dc2f'

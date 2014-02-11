@@ -3,9 +3,11 @@ package com.dc2f.dstore.test.hierachynodestore;
 import static com.dc2f.dstore.test.TreeAssertions.assertTree;
 import static com.dc2f.dstore.test.TreeAssertions.node;
 import static com.dc2f.dstore.test.TreeAssertions.properties;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +15,7 @@ import org.junit.Test;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
 import com.dc2f.dstore.hierachynodestore.WorkingTreeNode;
+import com.dc2f.dstore.storage.Property;
 import com.dc2f.dstore.storage.StorageBackend;
 import com.dc2f.dstore.test.TreeAssertions.ExpectedNode;
 
@@ -100,5 +103,16 @@ public abstract class AbstractHierarchicalNodeStoreTest {
 				node(properties("name", "B"))
 			);
 		assertTree("wt3 must see changes commited by wt1", expectedAB, root3);
+	}
+	
+	
+	@Test
+	public void testBinaryData() throws IllegalStateException, UnsupportedEncodingException {
+		WorkingTree wt1 = nodeStore.checkoutBranch("master");
+		WorkingTreeNode root = wt1.getRootNode();
+		WorkingTreeNode binary = root.addChild("binary");
+		binary.setProperty("content", new Property("Testtext".getBytes("utf8")));
+		
+		assertEquals("Testtext", new String((byte[]) binary.getProperty("content").getObjectValue()));
 	}
 }

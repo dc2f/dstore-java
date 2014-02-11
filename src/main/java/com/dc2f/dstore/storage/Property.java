@@ -11,7 +11,8 @@ public class Property {
 		@Nonnull LONG(Long.class),
 		@Nonnull DOUBLE(Double.class),
 		@Nonnull STRING(String.class),
-		@Nonnull BOOLEAN(Boolean.class);
+		@Nonnull BOOLEAN(Boolean.class),
+		@Nonnull BYTE(byte[].class);
 		
 		
 		private Class<?> valueClass;

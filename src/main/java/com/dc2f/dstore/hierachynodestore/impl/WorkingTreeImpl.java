@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.dc2f.dstore.hierachynodestore.Commit;
 import com.dc2f.dstore.hierachynodestore.HierarchicalNodeStore;
 import com.dc2f.dstore.hierachynodestore.WorkingTree;
@@ -23,6 +25,7 @@ import com.dc2f.dstore.storage.StorageId;
 import com.dc2f.dstore.storage.StoredCommit;
 import com.dc2f.dstore.storage.StoredFlatNode;
 
+@Slf4j
 public class WorkingTreeImpl implements WorkingTree {
 
 	/**
@@ -78,7 +81,7 @@ public class WorkingTreeImpl implements WorkingTree {
 		WorkingTreeNode oldRootNode = getRootNode();
 		Set<WorkingTreeNodeImpl> nodesToUpdate = findNodesToUpdate();
 		Map<WorkingTreeNode, MutableStoredFlatNode> storedFlatNodeMappings = new HashMap<>();
-//		System.out.println("nodesToUpdate: " + nodesToUpdate + " (" + changedNodes + ")");
+		log.trace("nodesToUpdate: {} ({})", new Object[]{nodesToUpdate, changedNodes});
 		// give the ones to update a new id before storing, otherwise child ids won't match
 		// FIXME: move mutable stored node into this method (e.g. by using a map)
 		for (WorkingTreeNodeImpl node : nodesToUpdate) {
@@ -170,7 +173,7 @@ public class WorkingTreeImpl implements WorkingTree {
 			while (true) {
 				// node has changed and is attached to root.
 				if (toUpdate.contains(node)) {
-//					System.out.println("already in toUpdate. " + node + " ---- " + changed);
+					log.trace("already in toUpdate. {}  ---  {}", new Object[]{node, changed});
 					toUpdate.addAll(changed);
 					break;
 				}
@@ -189,10 +192,10 @@ public class WorkingTreeImpl implements WorkingTree {
 					// if the last node isn't the root node,
 					// the node is detached from the tree and we don't need to write it
 					if (node == getRootNode()) {
-//						System.out.println("found the root node. " + changed);
+						log.debug("found the root node {}", new Object[]{changed});
 						toUpdate.addAll(changed);
 					} else {
-						System.out.println("node is detached from root node." + node + " (" + node.getStorageId() + ") / root: (" + getRootNode().getStorageId() + ")");
+						log.debug("node is detached from root node. {} ({}) / root: ({})", new Object[]{node, node.getStorageId(), getRootNode().getStorageId()});
 					}
 					break;
 				}

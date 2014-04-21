@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.dc2f.dstore.hierachynodestore.ChildQueryAdapter;
 import com.dc2f.dstore.hierachynodestore.StorageAdapter;
 import com.dc2f.dstore.storage.Property;
@@ -21,6 +23,7 @@ import com.dc2f.dstore.storage.simple.SimpleStringStorageId;
 /**
  * Storage implementation backed by a few hashmaps.
  */
+@Slf4j
 public class HashMapStorage implements StorageBackend {
 	
 	private final static String ROOT_COMMIT_ID = "rootCommitId";
@@ -81,7 +84,7 @@ public class HashMapStorage implements StorageBackend {
 
 	@Override
 	public StoredFlatNode writeNode(StoredFlatNode node) {
-//		System.out.println("Writing " + node.getStorageId());
+		log.debug("Writing " + node.getStorageId());
 		StoredFlatNode newNode = new StoredFlatNode(node);
 		storedNodes.put(node.getStorageId(), node);
 		return newNode;

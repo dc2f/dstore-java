@@ -14,7 +14,7 @@ apply plugin: 'sonar-runner'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
 
-version = '0.0.2'
+version = '0.0.3'
 group = 'com.dc2f'
 
 // In this section you declare where to find the dependencies of your project

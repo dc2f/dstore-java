@@ -105,6 +105,38 @@ public abstract class AbstractHierarchicalNodeStoreTest {
 		assertTree("wt3 must see changes commited by wt1", expectedAB, root3);
 	}
 	
+	@Test
+	public void testSettingPropertiesAndReCommit() {
+		WorkingTree wt = nodeStore.checkoutBranch("master");
+		WorkingTreeNode root = wt.getRootNode();
+		WorkingTreeNode a = root.addChild("A");
+		WorkingTreeNode b = root.addChild("B");
+		wt.commit("Commiting without properties.");
+		ExpectedNode expectedAB = node(properties("name", ""),
+				node(properties("name", "A")),
+				node(properties("name", "B"))
+			);
+		assertTree("wt1 was not stored correctly", expectedAB, root);
+		
+		a.setProperty("CONTENT", new Property("content"));
+		wt.commit("Changed content property for a.");
+		
+		expectedAB = node(properties("name", ""),
+					node(properties("name", "A", "CONTENT", "content")),
+					node(properties("name", "B"))
+				);
+		assertTree("wt1 was not stored correctly", expectedAB, root);
+		
+		a.setProperty("CONTENT", new Property("content1"));
+		wt.commit("Changed content property for a again.");
+		
+		expectedAB = node(properties("name", ""),
+				node(properties("name", "A", "CONTENT", "content1")),
+				node(properties("name", "B"))
+			);
+	assertTree("wt1 was not stored correctly", expectedAB, root);
+	}
+	
 	
 	@Test
 	public void testBinaryData() throws IllegalStateException, UnsupportedEncodingException {

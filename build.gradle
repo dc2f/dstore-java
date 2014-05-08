@@ -56,4 +56,5 @@ setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pghost');
 setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pgport');
 setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pguser');
 setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pgpassword');
+setTestPropertyIfExists(this, 'com.dc2f.dstore.test.pgdatabase');
 
